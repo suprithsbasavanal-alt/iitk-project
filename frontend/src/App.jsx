@@ -1212,51 +1212,88 @@ function PredictionTab({ token, onNavigate }) {
 
       {result && (
         <div className="glass-panel p-8 rounded-3xl border-l-8 border-l-primary relative overflow-hidden animate-slideUp">
-          <div className="border-b border-slate-800 pb-4 mb-6">
-            <h4 className="text-lg font-bold text-white">AI Diagnostics Result</h4>
-            <p className="text-xs text-slate-400 mt-0.5">Powered by Random Forest Classifier trained on UCI Cleveland Heart Disease dataset</p>
+          <div className="border-b border-slate-800 pb-4 mb-6 flex items-start justify-between">
+            <div>
+              <h4 className="text-lg font-bold text-white">AI Diagnostics Result</h4>
+              <p className="text-xs text-slate-400 mt-0.5">Random Forest Classifier · UCI Cleveland Heart Disease dataset</p>
+            </div>
+            <span className={`px-3 py-1.5 rounded-full text-xs font-black border tracking-wide ${
+              result.prediction === 'HIGH RISK'
+                ? 'bg-red-950/50 text-red-400 border-red-800/60'
+                : result.prediction === 'MEDIUM RISK'
+                ? 'bg-amber-950/50 text-amber-400 border-amber-800/60'
+                : 'bg-emerald-950/50 text-emerald-400 border-emerald-800/60'
+            }`}>
+              {result.prediction}
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
-            <div className={`p-6 rounded-2xl border-2 ${
+          {/* Metric Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className={`p-5 rounded-2xl border-2 text-center ${
               result.prediction === 'HIGH RISK'
                 ? 'bg-red-950/30 border-red-800/60'
                 : result.prediction === 'MEDIUM RISK'
                 ? 'bg-amber-950/30 border-amber-800/60'
                 : 'bg-emerald-950/30 border-emerald-800/60'
             }`}>
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">AI Assessment Risk</div>
-              <div className={`text-2xl font-black ${
-                result.prediction === 'HIGH RISK' ? 'text-red-400' : result.prediction === 'MEDIUM RISK' ? 'text-amber-400' : 'text-emerald-400'
-              }`}>
-                {result.prediction}
-              </div>
-            </div>
-
-            <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800">
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Risk Probability Index</div>
-              <div className="text-3xl font-black text-white">{result.risk_percentage}%</div>
+              <div className="text-3xl font-black text-white">{result.risk_percentage}<span className="text-lg text-slate-400">%</span></div>
             </div>
-
-            <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800">
+            <div className="p-5 bg-slate-900/50 rounded-2xl border border-slate-800 text-center">
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Model Confidence</div>
-              <div className="text-3xl font-black text-primary">{result.confidence}%</div>
+              <div className="text-3xl font-black text-primary">{result.confidence}<span className="text-lg text-slate-400">%</span></div>
+            </div>
+            <div className="p-5 bg-slate-900/50 rounded-2xl border border-slate-800 text-center">
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Model</div>
+              <div className="text-sm font-bold text-slate-200 leading-tight mt-1">Random Forest<br/><span className="text-slate-400 font-normal text-xs">150 Trees · Balanced</span></div>
             </div>
           </div>
 
-          <div className="flex gap-4">
+          {/* AI Clinical Recommendation */}
+          {result.recommendation && (
+            <div className={`mb-6 p-5 rounded-2xl border ${
+              result.prediction === 'HIGH RISK'
+                ? 'bg-red-950/20 border-red-900/40'
+                : result.prediction === 'MEDIUM RISK'
+                ? 'bg-amber-950/20 border-amber-900/40'
+                : 'bg-emerald-950/20 border-emerald-900/40'
+            }`}>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="material-symbols-outlined text-primary text-lg">clinical_notes</span>
+                <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">Clinical Recommendations</span>
+              </div>
+              <div className="space-y-2">
+                {result.recommendation.split('\n').filter(line => line.trim()).map((line, i) => (
+                  <div key={i} className="flex items-start gap-2 text-sm text-slate-300 leading-relaxed">
+                    <span className="text-primary mt-0.5 text-xs font-bold flex-shrink-0">›</span>
+                    <span>{line.replace(/^\d+\.\s*/, '')}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 pt-2">
             <button
               onClick={handleDownloadPDF}
-              className="py-3 px-6 bg-primary hover:bg-teal-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer"
+              className="py-3 px-6 bg-primary hover:bg-teal-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer active:scale-95"
             >
-              <span className="material-symbols-outlined">download</span>
+              <span className="material-symbols-outlined text-lg">download</span>
               Download PDF Report
             </button>
             <button
               onClick={() => onNavigate('patient_history')}
-              className="py-3 px-6 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all border border-slate-700 cursor-pointer"
+              className="py-3 px-6 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all border border-slate-700 cursor-pointer active:scale-95"
             >
               View History Log
+            </button>
+            <button
+              onClick={() => setResult(null)}
+              className="py-3 px-6 bg-transparent hover:bg-slate-800 text-slate-400 font-bold rounded-xl transition-all border border-slate-800 cursor-pointer active:scale-95"
+            >
+              New Prediction
             </button>
           </div>
         </div>

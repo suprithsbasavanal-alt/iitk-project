@@ -53,7 +53,7 @@ class PatientResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# Prediction Schemas (Simplified for Step 1 - placeholders)
+# Prediction Schemas
 class PredictionCreate(BaseModel):
     patient_id: str
     prediction: str          # 'LOW RISK', 'MEDIUM RISK', 'HIGH RISK'
@@ -67,6 +67,7 @@ class PredictionResponse(BaseModel):
     risk_percentage: float
     confidence: float
     date: str
+    recommendation: Optional[str] = None   # AI-generated clinical recommendation
 
     class Config:
         from_attributes = True
