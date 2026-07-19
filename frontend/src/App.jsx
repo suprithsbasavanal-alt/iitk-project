@@ -1213,26 +1213,33 @@ function PredictionTab({ token, onNavigate }) {
       {result && (
         <div className="glass-panel p-8 rounded-3xl border-l-8 border-l-primary relative overflow-hidden animate-slideUp">
           <div className="border-b border-slate-800 pb-4 mb-6">
-            <h4 className="text-lg font-bold text-white">Diagnostics Outcome (Mock prediction)</h4>
+            <h4 className="text-lg font-bold text-white">AI Diagnostics Result</h4>
+            <p className="text-xs text-slate-400 mt-0.5">Powered by Random Forest Classifier trained on UCI Cleveland Heart Disease dataset</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
-            <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800">
+            <div className={`p-6 rounded-2xl border-2 ${
+              result.prediction === 'HIGH RISK'
+                ? 'bg-red-950/30 border-red-800/60'
+                : result.prediction === 'MEDIUM RISK'
+                ? 'bg-amber-950/30 border-amber-800/60'
+                : 'bg-emerald-950/30 border-emerald-800/60'
+            }`}>
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">AI Assessment Risk</div>
               <div className={`text-2xl font-black ${
-                result.prediction === 'HIGH RISK' ? 'text-red-405' : result.prediction === 'MEDIUM RISK' ? 'text-amber-405' : 'text-emerald-405'
+                result.prediction === 'HIGH RISK' ? 'text-red-400' : result.prediction === 'MEDIUM RISK' ? 'text-amber-400' : 'text-emerald-400'
               }`}>
                 {result.prediction}
               </div>
             </div>
 
             <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800">
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Risk Percentage</div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Risk Probability Index</div>
               <div className="text-3xl font-black text-white">{result.risk_percentage}%</div>
             </div>
 
             <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800">
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">AI Confidence</div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Model Confidence</div>
               <div className="text-3xl font-black text-primary">{result.confidence}%</div>
             </div>
           </div>
@@ -1247,7 +1254,7 @@ function PredictionTab({ token, onNavigate }) {
             </button>
             <button
               onClick={() => onNavigate('patient_history')}
-              className="py-3 px-6 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all border border-slate-705 cursor-pointer"
+              className="py-3 px-6 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all border border-slate-700 cursor-pointer"
             >
               View History Log
             </button>

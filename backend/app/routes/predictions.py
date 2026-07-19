@@ -5,11 +5,13 @@ from pydantic import BaseModel
 from database.db import get_db, Patient, Prediction, Doctor
 from backend.app.models.schemas import PredictionResponse
 from backend.app.auth.auth_service import get_current_user, get_current_doctor_or_admin
+from backend.app.services.prediction_service import prediction_service
 import datetime
+import json
 
 router = APIRouter(prefix="/api/predictions", tags=["Predictions"])
 
-# Health form payload structure for Step 1 mock predictions
+# Health form payload structure — 13 clinical features from Cleveland dataset
 class HealthDataInput(BaseModel):
     patient_id: str
     age: int
@@ -29,8 +31,8 @@ class HealthDataInput(BaseModel):
 
 @router.post("/predict", response_model=PredictionResponse)
 def create_prediction(
-    prediction_in: HealthDataInput, 
-    db: Session = Depends(get_db), 
+    prediction_in: HealthDataInput,
+    db: Session = Depends(get_db),
     current_user: Doctor = Depends(get_current_doctor_or_admin)
 ):
     # 1. Verify Patient exists
@@ -41,32 +43,51 @@ def create_prediction(
             detail=f"Patient with ID {prediction_in.patient_id} not registered."
         )
 
-    # 2. Mock prediction engine logic (Step 1 placeholder)
-    # Simple deterministic rules to make the prototype feel real:
-    # High BP (>140) or High Cholesterol (>240) -> HIGH RISK
-    # Otherwise, if Moderate -> MEDIUM RISK, otherwise LOW RISK
-    risk_level = "LOW RISK"
-    risk_pct = 24.5
-    confidence = 91.2
+    # 2. Check model is ready
+    if prediction_service.model is None or prediction_service.scaler is None:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="AI model is not loaded. Please run ml/train_model.py first."
+        )
 
-    if prediction_in.chol > 240 or prediction_in.trestbps > 140 or prediction_in.ca > 1:
-        risk_level = "HIGH RISK"
-        risk_pct = 93.0
-        confidence = 95.2
-    elif prediction_in.chol > 200 or prediction_in.trestbps > 120 or prediction_in.thalach < 130:
-        risk_level = "MEDIUM RISK"
-        risk_pct = 54.0
-        confidence = 88.6
+    # 3. Run real AI prediction
+    clinical_inputs = {
+        "age": prediction_in.age,
+        "sex": prediction_in.sex,
+        "cp": prediction_in.cp,
+        "trestbps": prediction_in.trestbps,
+        "chol": prediction_in.chol,
+        "fbs": prediction_in.fbs,
+        "restecg": prediction_in.restecg,
+        "thalach": prediction_in.thalach,
+        "exang": prediction_in.exang,
+        "oldpeak": prediction_in.oldpeak,
+        "slope": prediction_in.slope,
+        "ca": prediction_in.ca,
+        "thal": prediction_in.thal
+    }
 
-    # 3. Save prediction into SQLite Database
+    try:
+        result = prediction_service.predict(clinical_inputs)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Prediction engine error: {str(e)}"
+        )
+
+    # Use doctor override recommendation if provided, else use AI-generated one
+    final_recommendation = prediction_in.doctor_recommendation or result["recommendation"]
+
+    # 4. Save prediction result into SQLite Database (including raw clinical inputs)
     db_prediction = Prediction(
         patient_id=prediction_in.patient_id,
-        prediction=risk_level,
-        risk_percentage=risk_pct,
-        confidence=confidence,
-        date=datetime.datetime.now().isoformat()
+        prediction=result["prediction_status"],
+        risk_percentage=result["risk_percentage"],
+        confidence=result["prediction_confidence"],
+        date=datetime.datetime.now().isoformat(),
+        clinical_data=json.dumps(clinical_inputs),
+        recommendation=final_recommendation
     )
-
     db.add(db_prediction)
     db.commit()
     db.refresh(db_prediction)
@@ -74,19 +95,21 @@ def create_prediction(
 
 @router.get("/history", response_model=List[PredictionResponse])
 def get_prediction_history(
-    db: Session = Depends(get_db), 
+    db: Session = Depends(get_db),
     current_user: Doctor = Depends(get_current_user)
 ):
     if current_user.role == "patient":
-        predictions = db.query(Prediction).filter(Prediction.patient_id == current_user.email).order_by(Prediction.date.desc()).all()
+        predictions = db.query(Prediction).filter(
+            Prediction.patient_id == current_user.email
+        ).order_by(Prediction.date.desc()).all()
     else:
         predictions = db.query(Prediction).order_by(Prediction.date.desc()).all()
     return predictions
 
 @router.get("/{prediction_id}", response_model=PredictionResponse)
 def get_prediction(
-    prediction_id: int, 
-    db: Session = Depends(get_db), 
+    prediction_id: int,
+    db: Session = Depends(get_db),
     current_user: Doctor = Depends(get_current_user)
 ):
     prediction = db.query(Prediction).filter(Prediction.id == prediction_id).first()
@@ -95,11 +118,11 @@ def get_prediction(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Prediction record not found"
         )
-    
+
     if current_user.role == "patient" and prediction.patient_id != current_user.email:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied."
         )
-        
+
     return prediction

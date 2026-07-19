@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Float, Text, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import datetime
@@ -42,6 +42,8 @@ class Prediction(Base):
     risk_percentage = Column(Float, nullable=False)
     confidence = Column(Float, nullable=False)
     date = Column(String, default=lambda: datetime.datetime.now().isoformat())
+    clinical_data = Column(Text, nullable=True)   # JSON string of 13 clinical inputs
+    recommendation = Column(Text, nullable=True)  # AI/Doctor recommendation text
 
     patient = relationship("Patient", back_populates="predictions")
 
