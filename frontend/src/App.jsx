@@ -634,6 +634,19 @@ function PatientsTab({ token }) {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Search & filter state
+  const [search, setSearch] = useState('');
+  const [genderFilter, setGenderFilter] = useState('');
+
+  // Derived: filtered list
+  const filteredPatients = patients.filter(p => {
+    const matchesSearch = !search ||
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.id.toLowerCase().includes(search.toLowerCase());
+    const matchesGender = !genderFilter || p.gender === genderFilter;
+    return matchesSearch && matchesGender;
+  });
+
   // Form states
   const [id, setId] = useState('');
   const [name, setName] = useState('');
@@ -739,8 +752,36 @@ function PatientsTab({ token }) {
 
       {view === 'list' ? (
         <div className="glass-panel rounded-3xl overflow-hidden">
+          {/* Search & Filter Bar */}
+          <div className="p-4 border-b border-slate-800/60 flex flex-col sm:flex-row gap-3 items-center justify-between">
+            <div className="relative w-full sm:w-72">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-lg pointer-events-none">search</span>
+              <input
+                type="text"
+                placeholder="Search by name or ID…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <select
+                value={genderFilter}
+                onChange={e => setGenderFilter(e.target.value)}
+                className="px-3 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-slate-300 text-sm"
+              >
+                <option value="">All Genders</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+              <span className="text-xs text-slate-500 whitespace-nowrap">
+                Showing <span className="font-bold text-primary">{filteredPatients.length}</span> / {patients.length}
+              </span>
+            </div>
+          </div>
+
           {loading ? (
-            <div className="text-center py-12 text-slate-400">Loading patients...</div>
+            <div className="text-center py-12 text-slate-400">Loading patients…</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -748,30 +789,37 @@ function PatientsTab({ token }) {
                   <tr>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Name</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Age/Gender</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Age / Gender</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">H/W Index</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Height / Weight</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/50">
-                  {patients.length > 0 ? (
-                    patients.map((p) => (
-                      <tr key={p.id} className="hover:bg-slate-800/10">
-                        <td className="px-6 py-4 text-xs font-bold text-slate-300">{p.id}</td>
+                  {filteredPatients.length > 0 ? (
+                    filteredPatients.map((p) => (
+                      <tr key={p.id} className="hover:bg-slate-800/20 transition-colors">
+                        <td className="px-6 py-4 text-xs font-mono font-bold text-primary">{p.id}</td>
                         <td className="px-6 py-4 text-sm font-semibold text-white">{p.name}</td>
-                        <td className="px-6 py-4 text-xs text-slate-300">{p.age} yrs / {p.gender}</td>
-                        <td className="px-6 py-4 text-xs text-slate-400">
-                          <div>{p.phone || 'No phone'}</div>
-                          <div>{p.email || 'No email'}</div>
+                        <td className="px-6 py-4">
+                          <span className="text-xs text-slate-300">{p.age} yrs</span>
+                          <span className={`ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            p.gender === 'Male' ? 'bg-blue-950/60 text-blue-400' : 'bg-pink-950/60 text-pink-400'
+                          }`}>{p.gender}</span>
                         </td>
-                        <td className="px-6 py-4 text-xs text-slate-450">
-                          {p.height ? `${p.height} cm` : 'N/A'} / {p.weight ? `${p.weight} kg` : 'N/A'}
+                        <td className="px-6 py-4 text-xs text-slate-400">
+                          <div className="flex items-center gap-1"><span className="material-symbols-outlined text-[12px] text-slate-600">phone</span>{p.phone || '—'}</div>
+                          <div className="flex items-center gap-1 mt-0.5"><span className="material-symbols-outlined text-[12px] text-slate-600">mail</span>{p.email || '—'}</div>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-slate-400">
+                          {p.height ? `${p.height} cm` : 'N/A'} &nbsp;/&nbsp; {p.weight ? `${p.weight} kg` : 'N/A'}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center text-slate-500 font-medium">No patient profiles registered.</td>
+                      <td colSpan="5" className="px-6 py-12 text-center text-slate-500 font-medium">
+                        {search || genderFilter ? 'No patients match your search.' : 'No patient profiles registered yet.'}
+                      </td>
                     </tr>
                   )}
                 </tbody>
