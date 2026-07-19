@@ -1,0 +1,57 @@
+# ─── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# Virtual Environments
+.venv/
+venv/
+env/
+.env
+ENV/
+
+# Distribution / Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Type Checking
+.mypy_cache/
+.dmypy.json
+
+# ─── Database ─────────────────────────────────────────────
+# Uncomment the next line to exclude the DB from git
+# database/heartcare.db
+reports/
+
+# ─── ML Artifacts ─────────────────────────────────────────
+# Uncomment to exclude large pickle files (re-train on setup)
+# ml/heart_model.pkl
+# ml/scaler.pkl
+ml/dataset/
+
+# ─── Node / Frontend ──────────────────────────────────────
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.oxlintrc.json
+
+# ─── OS & Editor ──────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ─── Logs ─────────────────────────────────────────────────
+*.log
+logs/
