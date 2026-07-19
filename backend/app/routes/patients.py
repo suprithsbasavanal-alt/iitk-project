@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from backend.app.database.db import get_db, Patient, Prediction, User
+from database.db import get_db, Patient, Prediction, Doctor
 from backend.app.models.schemas import PatientCreate, PatientResponse, PredictionResponse
 from backend.app.auth.auth_service import get_current_user, get_current_doctor_or_admin
 
 router = APIRouter(prefix="/api/patients", tags=["Patients"])
 
 @router.post("/", response_model=PatientResponse)
-def register_patient(patient_in: PatientCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_doctor_or_admin)):
-    existing = db.query(Patient).filter(Patient.patient_id == patient_in.patient_id).first()
+def register_patient(patient_in: PatientCreate, db: Session = Depends(get_db), current_user: Doctor = Depends(get_current_doctor_or_admin)):
+    existing = db.query(Patient).filter(Patient.id == patient_in.id).first()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -17,7 +17,7 @@ def register_patient(patient_in: PatientCreate, db: Session = Depends(get_db), c
         )
     
     db_patient = Patient(
-        patient_id=patient_in.patient_id,
+        id=patient_in.id,
         name=patient_in.name,
         age=patient_in.age,
         gender=patient_in.gender,
@@ -32,20 +32,20 @@ def register_patient(patient_in: PatientCreate, db: Session = Depends(get_db), c
     return db_patient
 
 @router.get("/", response_model=List[PatientResponse])
-def list_patients(db: Session = Depends(get_db), current_user: User = Depends(get_current_doctor_or_admin)):
+def list_patients(db: Session = Depends(get_db), current_user: Doctor = Depends(get_current_doctor_or_admin)):
     patients = db.query(Patient).all()
     return patients
 
 @router.get("/{patient_id}", response_model=PatientResponse)
-def get_patient(patient_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_patient(patient_id: str, db: Session = Depends(get_db), current_user: Doctor = Depends(get_current_user)):
     # Check permissions: patients can only access their own profile
-    if current_user.role == "patient" and current_user.username != patient_id:
+    if current_user.role == "patient" and current_user.email != patient_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied. You can only view your own profile."
         )
         
-    patient = db.query(Patient).filter(Patient.patient_id == patient_id).first()
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -54,9 +54,9 @@ def get_patient(patient_id: str, db: Session = Depends(get_db), current_user: Us
     return patient
 
 @router.get("/{patient_id}/predictions", response_model=List[PredictionResponse])
-def get_patient_predictions(patient_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def get_patient_predictions(patient_id: str, db: Session = Depends(get_db), current_user: Doctor = Depends(get_current_user)):
     # Check permissions
-    if current_user.role == "patient" and current_user.username != patient_id:
+    if current_user.role == "patient" and current_user.email != patient_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied. You can only view your own predictions."

@@ -1,29 +1,24 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
-import datetime
 
-# User Schemas
+# User/Doctor Schemas
 class UserCreate(BaseModel):
-    username: str
-    password: str
-    role: str  # 'admin', 'doctor', 'patient'
     name: str
-    phone: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: EmailStr
+    password: str
+    role: str = "doctor"  # 'doctor' or 'admin'
 
 class UserResponse(BaseModel):
     id: int
-    username: str
-    role: str
     name: str
-    phone: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: EmailStr
+    role: str
 
     class Config:
         from_attributes = True
 
 class UserLogin(BaseModel):
-    username: str
+    email: str
     password: str
 
 class Token(BaseModel):
@@ -31,22 +26,22 @@ class Token(BaseModel):
     token_type: str
     role: str
     name: str
-    username: str
+    email: str
     id: int
 
 # Patient Schemas
 class PatientCreate(BaseModel):
-    patient_id: str
+    id: str  # e.g., PAT-001
     name: str
     age: int
-    gender: str  # 'Male', 'Female'
+    gender: str
     phone: Optional[str] = None
     email: Optional[str] = None
     height: Optional[float] = None
     weight: Optional[float] = None
 
 class PatientResponse(BaseModel):
-    patient_id: str
+    id: str
     name: str
     age: int
     gender: str
@@ -58,46 +53,20 @@ class PatientResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# Prediction Schemas
+# Prediction Schemas (Simplified for Step 1 - placeholders)
 class PredictionCreate(BaseModel):
     patient_id: str
-    age: int
-    sex: int  # 1 = Male, 0 = Female
-    cp: int   # 1, 2, 3, 4
-    trestbps: int
-    chol: int
-    fbs: int  # 1 = Yes, 0 = No
-    restecg: int # 0, 1, 2
-    thalach: int
-    exang: int # 1 = Yes, 0 = No
-    oldpeak: float
-    slope: int # 1, 2, 3
-    ca: int    # 0, 1, 2, 3
-    thal: int  # 3 = normal, 6 = fixed, 7 = reversible
-    doctor_recommendation: Optional[str] = None
+    prediction: str          # 'LOW RISK', 'MEDIUM RISK', 'HIGH RISK'
+    risk_percentage: float
+    confidence: float
 
 class PredictionResponse(BaseModel):
     id: int
     patient_id: str
-    doctor_id: Optional[int] = None
-    date: str
-    age: int
-    sex: int
-    cp: int
-    trestbps: int
-    chol: int
-    fbs: int
-    restecg: int
-    thalach: int
-    exang: int
-    oldpeak: float
-    slope: int
-    ca: int
-    thal: int
-    prediction_status: str
-    prediction_confidence: float
+    prediction: str
     risk_percentage: float
-    doctor_recommendation: Optional[str] = None
+    confidence: float
+    date: str
 
     class Config:
         from_attributes = True

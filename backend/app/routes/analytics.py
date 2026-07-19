@@ -1,45 +1,37 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from typing import Dict, Any, List
 import datetime
-from backend.app.database.db import get_db, Patient, Prediction, User
+from database.db import get_db, Patient, Prediction, Doctor
 from backend.app.auth.auth_service import get_current_doctor_or_admin
 
 router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 
 @router.get("/summary")
-def get_dashboard_summary(db: Session = Depends(get_db), current_user: User = Depends(get_current_doctor_or_admin)):
-    """
-    Returns general stats for the clinician dashboard.
-    """
+def get_dashboard_summary(db: Session = Depends(get_db), current_user: Doctor = Depends(get_current_doctor_or_admin)):
     total_patients = db.query(Patient).count()
     predictions_made = db.query(Prediction).count()
     
-    high_risk_patients = db.query(Prediction).filter(Prediction.prediction_status == "HIGH RISK").count()
-    medium_risk = db.query(Prediction).filter(Prediction.prediction_status == "MEDIUM RISK").count()
-    low_risk_patients = db.query(Prediction).filter(Prediction.prediction_status == "LOW RISK").count()
+    high_risk_patients = db.query(Prediction).filter(Prediction.prediction == "HIGH RISK").count()
+    medium_risk = db.query(Prediction).filter(Prediction.prediction == "MEDIUM RISK").count()
+    low_risk_patients = db.query(Prediction).filter(Prediction.prediction == "LOW RISK").count()
 
-    # Get recent predictions with patient names
     recent_predictions_raw = db.query(Prediction).order_by(Prediction.date.desc()).limit(10).all()
     
     recent_predictions = []
     for pred in recent_predictions_raw:
-        patient = db.query(Patient).filter(Patient.patient_id == pred.patient_id).first()
+        patient = db.query(Patient).filter(Patient.id == pred.patient_id).first()
         recent_predictions.append({
             "id": pred.id,
             "patient_id": pred.patient_id,
             "patient_name": patient.name if patient else "Unknown",
             "date": pred.date,
-            "prediction_status": pred.prediction_status,
-            "prediction_confidence": pred.prediction_confidence,
+            "prediction_status": pred.prediction,
+            "prediction_confidence": pred.confidence,
             "risk_percentage": pred.risk_percentage,
-            "age": pred.age,
-            "sex": pred.sex
+            "age": patient.age if patient else 50,
+            "sex": 1 if patient and patient.gender == "Male" else 0
         })
-
-    # Fixed base accuracy for this trained model
-    accuracy = 67.2
 
     return {
         "total_patients": total_patients,
@@ -47,26 +39,19 @@ def get_dashboard_summary(db: Session = Depends(get_db), current_user: User = De
         "high_risk_patients": high_risk_patients,
         "medium_risk_patients": medium_risk,
         "low_risk_patients": low_risk_patients,
-        "prediction_accuracy": accuracy,
+        "prediction_accuracy": 67.2,
         "recent_predictions": recent_predictions
     }
 
 @router.get("/charts-data")
-def get_charts_data(db: Session = Depends(get_db), current_user: User = Depends(get_current_doctor_or_admin)):
-    """
-    Returns grouped data for frontend chart visualizers.
-    """
-    # 1. Male vs Female distribution
+def get_charts_data(db: Session = Depends(get_db), current_user: Doctor = Depends(get_current_doctor_or_admin)):
     male_count = db.query(Patient).filter(Patient.gender == "Male").count()
     female_count = db.query(Patient).filter(Patient.gender == "Female").count()
 
-    # 2. Risk classification distribution
-    low_risk = db.query(Prediction).filter(Prediction.prediction_status == "LOW RISK").count()
-    med_risk = db.query(Prediction).filter(Prediction.prediction_status == "MEDIUM RISK").count()
-    high_risk = db.query(Prediction).filter(Prediction.prediction_status == "HIGH RISK").count()
+    low_risk = db.query(Prediction).filter(Prediction.prediction == "LOW RISK").count()
+    med_risk = db.query(Prediction).filter(Prediction.prediction == "MEDIUM RISK").count()
+    high_risk = db.query(Prediction).filter(Prediction.prediction == "HIGH RISK").count()
 
-    # 3. Age Distribution
-    # Under 40, 40-49, 50-59, 60-69, 70+
     patients = db.query(Patient.age).all()
     age_groups = {
         "Under 40": 0,
@@ -88,12 +73,9 @@ def get_charts_data(db: Session = Depends(get_db), current_user: User = Depends(
         else:
             age_groups["70+"] += 1
 
-    # 4. Predictions by month (Last 6 months)
-    # Since we use SQLite, we can parse ISO dates to get months
     predictions = db.query(Prediction.date).all()
     monthly_data = {}
     
-    # Pre-populate past 6 months
     today = datetime.date.today()
     for i in range(5, -1, -1):
         d = today - datetime.timedelta(days=i*30)

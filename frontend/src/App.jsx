@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, RadialLinearScale, ArcElement, Title as ChartTitle, Tooltip, Legend } from 'chart.js';
 import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
 
-// Register Chart.js elements
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, RadialLinearScale, ArcElement, ChartTitle, Tooltip, Legend);
 
 const API_BASE = "http://localhost:8000";
@@ -13,13 +12,11 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Sync token and user to localStorage
   const handleLogin = (newToken, newUser) => {
     setToken(newToken);
     setUser(newUser);
     localStorage.setItem('hc_token', newToken);
     localStorage.setItem('hc_user', JSON.stringify(newUser));
-    // If logged in as patient, default to the patient_history view
     if (newUser.role === 'patient') {
       setActiveTab('patient_history');
     } else {
@@ -39,9 +36,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-slate-200 font-body antialiased flex">
+    <div className="min-h-screen bg-background text-slate-200 font-body antialiased flex flex-col md:flex-row">
       {/* Sidebar Navigation - Desktop */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-surface flex flex-col py-6 border-r border-slate-800 shadow-xl z-50 hidden md:flex">
+      <aside className="h-auto md:h-screen w-full md:w-64 bg-surface flex flex-col py-6 border-r border-slate-800 shadow-xl z-50 md:fixed md:left-0 md:top-0">
         {/* Branding Profile Header */}
         <div className="px-6 mb-8 flex flex-col items-start">
           <div className="flex items-center gap-3 mb-6">
@@ -82,29 +79,29 @@ export default function App() {
 
           {user.role !== 'patient' && (
             <button
-              onClick={() => setActiveTab('register_patient')}
+              onClick={() => setActiveTab('patients')}
               className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-all rounded-lg active:scale-95 ${
-                activeTab === 'register_patient'
+                activeTab === 'patients'
                   ? 'bg-primary/20 text-primary border-l-4 border-primary font-bold'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
               }`}
             >
-              <span className="material-symbols-outlined">person_add</span>
-              <span>Register Patient</span>
+              <span className="material-symbols-outlined">group</span>
+              <span>Patients</span>
             </button>
           )}
 
           {user.role !== 'patient' && (
             <button
-              onClick={() => setActiveTab('new_prediction')}
+              onClick={() => setActiveTab('prediction')}
               className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-all rounded-lg active:scale-95 ${
-                activeTab === 'new_prediction'
+                activeTab === 'prediction'
                   ? 'bg-primary/20 text-primary border-l-4 border-primary font-bold'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
               }`}
             >
               <span className="material-symbols-outlined">clinical_notes</span>
-              <span>New Prediction</span>
+              <span>Prediction</span>
             </button>
           )}
 
@@ -117,8 +114,22 @@ export default function App() {
             }`}
           >
             <span className="material-symbols-outlined">history</span>
-            <span>{user.role === 'patient' ? 'My Diagnostics' : 'Patient History'}</span>
+            <span>History</span>
           </button>
+
+          {user.role !== 'patient' && (
+            <button
+              onClick={() => setActiveTab('reports')}
+              className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-all rounded-lg active:scale-95 ${
+                activeTab === 'reports'
+                  ? 'bg-primary/20 text-primary border-l-4 border-primary font-bold'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+              }`}
+            >
+              <span className="material-symbols-outlined">description</span>
+              <span>Reports</span>
+            </button>
+          )}
 
           {user.role !== 'patient' && (
             <button
@@ -134,19 +145,17 @@ export default function App() {
             </button>
           )}
 
-          {user.role === 'admin' && (
-            <button
-              onClick={() => setActiveTab('admin_panel')}
-              className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-all rounded-lg active:scale-95 ${
-                activeTab === 'admin_panel'
-                  ? 'bg-primary/20 text-primary border-l-4 border-primary font-bold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-              }`}
-            >
-              <span className="material-symbols-outlined">admin_panel_settings</span>
-              <span>Admin Panel</span>
-            </button>
-          )}
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`w-full text-left px-4 py-3 flex items-center gap-3 transition-all rounded-lg active:scale-95 ${
+              activeTab === 'settings'
+                ? 'bg-primary/20 text-primary border-l-4 border-primary font-bold'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+            }`}
+          >
+            <span className="material-symbols-outlined">settings</span>
+            <span>Settings</span>
+          </button>
         </nav>
 
         {/* Logout Section */}
@@ -165,8 +174,8 @@ export default function App() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 md:ml-64 min-h-screen flex flex-col">
-        {/* Top AppBar Header */}
+      <div className="flex-1 md:pl-64 min-h-screen flex flex-col">
+        {/* Top Bar Navigation */}
         <header className="bg-surface/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40 flex justify-between items-center px-6 md:px-8 h-20">
           <div className="flex items-center gap-4">
             <button
@@ -176,59 +185,70 @@ export default function App() {
               <span className="material-symbols-outlined">menu</span>
             </button>
             <h1 className="font-headline font-black text-primary text-xl md:text-2xl tracking-tight">
-              HeartCare Clinical AI
+              HeartCare AI
             </h1>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex flex-col items-end mr-2">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Diagnostic Station</span>
-              <span className="text-sm font-medium text-white">Central-04A</span>
+          
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs text-slate-400 font-bold border border-slate-700">
+                DR
+              </div>
+              <div className="hidden sm:flex flex-col items-start">
+                <span className="text-xs font-bold text-white">{user.name}</span>
+                <span className="text-[9px] text-slate-400 uppercase tracking-wider">{user.role}</span>
+              </div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-              <span className="material-symbols-outlined">notifications</span>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1.5 bg-slate-850 hover:bg-slate-800 border border-slate-700 hover:text-red-400 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[14px]">logout</span>
+              Logout
+            </button>
           </div>
         </header>
 
-        {/* Dynamic Page Views */}
+        {/* Dynamic Views */}
         <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
           {activeTab === 'dashboard' && user.role !== 'patient' && (
             <DashboardTab token={token} onNavigate={setActiveTab} />
           )}
-          {activeTab === 'register_patient' && user.role !== 'patient' && (
-            <RegisterPatientTab token={token} />
+          {activeTab === 'patients' && user.role !== 'patient' && (
+            <PatientsTab token={token} />
           )}
-          {activeTab === 'new_prediction' && user.role !== 'patient' && (
-            <NewPredictionTab token={token} onNavigate={setActiveTab} />
+          {activeTab === 'prediction' && user.role !== 'patient' && (
+            <PredictionTab token={token} onNavigate={setActiveTab} />
           )}
           {activeTab === 'patient_history' && (
             <PatientHistoryTab token={token} user={user} />
           )}
+          {activeTab === 'reports' && user.role !== 'patient' && (
+            <ReportsTab token={token} />
+          )}
           {activeTab === 'analytics' && user.role !== 'patient' && (
             <AnalyticsTab token={token} />
           )}
-          {activeTab === 'admin_panel' && user.role === 'admin' && (
-            <AdminPanelTab token={token} />
+          {activeTab === 'settings' && (
+            <SettingsTab token={token} user={user} />
           )}
         </main>
       </div>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 flex md:hidden">
-          {/* Overlay backdrop */}
           <div 
             onClick={() => setMobileMenuOpen(false)}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
           ></div>
           
-          {/* Menu Drawer */}
           <div className="relative w-64 max-w-xs bg-surface h-full flex flex-col py-6 px-4 shadow-2xl border-r border-slate-800">
             <div className="flex justify-between items-center mb-8 px-2">
               <span className="font-headline font-bold text-primary text-xl">HeartCare AI</span>
               <button 
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-slate-400 hover:text-slate-200"
+                className="text-slate-400"
               >
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -249,25 +269,25 @@ export default function App() {
 
               {user.role !== 'patient' && (
                 <button
-                  onClick={() => { setActiveTab('register_patient'); setMobileMenuOpen(false); }}
+                  onClick={() => { setActiveTab('patients'); setMobileMenuOpen(false); }}
                   className={`w-full text-left px-4 py-3 flex items-center gap-3 rounded-lg ${
-                    activeTab === 'register_patient' ? 'bg-primary/20 text-primary font-bold' : 'text-slate-400'
+                    activeTab === 'patients' ? 'bg-primary/20 text-primary font-bold' : 'text-slate-400'
                   }`}
                 >
-                  <span className="material-symbols-outlined">person_add</span>
-                  <span>Register Patient</span>
+                  <span className="material-symbols-outlined">group</span>
+                  <span>Patients</span>
                 </button>
               )}
 
               {user.role !== 'patient' && (
                 <button
-                  onClick={() => { setActiveTab('new_prediction'); setMobileMenuOpen(false); }}
+                  onClick={() => { setActiveTab('prediction'); setMobileMenuOpen(false); }}
                   className={`w-full text-left px-4 py-3 flex items-center gap-3 rounded-lg ${
-                    activeTab === 'new_prediction' ? 'bg-primary/20 text-primary font-bold' : 'text-slate-400'
+                    activeTab === 'prediction' ? 'bg-primary/20 text-primary font-bold' : 'text-slate-400'
                   }`}
                 >
                   <span className="material-symbols-outlined">clinical_notes</span>
-                  <span>New Prediction</span>
+                  <span>Prediction</span>
                 </button>
               )}
 
@@ -278,8 +298,20 @@ export default function App() {
                 }`}
               >
                 <span className="material-symbols-outlined">history</span>
-                <span>{user.role === 'patient' ? 'My Diagnostics' : 'Patient History'}</span>
+                <span>History</span>
               </button>
+
+              {user.role !== 'patient' && (
+                <button
+                  onClick={() => { setActiveTab('reports'); setMobileMenuOpen(false); }}
+                  className={`w-full text-left px-4 py-3 flex items-center gap-3 rounded-lg ${
+                    activeTab === 'reports' ? 'bg-primary/20 text-primary font-bold' : 'text-slate-400'
+                  }`}
+                >
+                  <span className="material-symbols-outlined">description</span>
+                  <span>Reports</span>
+                </button>
+              )}
 
               {user.role !== 'patient' && (
                 <button
@@ -293,28 +325,16 @@ export default function App() {
                 </button>
               )}
 
-              {user.role === 'admin' && (
-                <button
-                  onClick={() => { setActiveTab('admin_panel'); setMobileMenuOpen(false); }}
-                  className={`w-full text-left px-4 py-3 flex items-center gap-3 rounded-lg ${
-                    activeTab === 'admin_panel' ? 'bg-primary/20 text-primary font-bold' : 'text-slate-400'
-                  }`}
-                >
-                  <span className="material-symbols-outlined">admin_panel_settings</span>
-                  <span>Admin Panel</span>
-                </button>
-              )}
-            </nav>
-
-            <div className="mt-auto px-2">
               <button
-                onClick={handleLogout}
-                className="w-full px-4 py-2 bg-red-950/40 text-red-400 hover:bg-red-900/30 border border-red-900/50 rounded-xl flex items-center justify-center gap-2"
+                onClick={() => { setActiveTab('settings'); setMobileMenuOpen(false); }}
+                className={`w-full text-left px-4 py-3 flex items-center gap-3 rounded-lg ${
+                  activeTab === 'settings' ? 'bg-primary/20 text-primary font-bold' : 'text-slate-400'
+                }`}
               >
-                <span className="material-symbols-outlined text-sm">logout</span>
-                <span className="text-sm font-semibold">Sign Out</span>
+                <span className="material-symbols-outlined">settings</span>
+                <span>Settings</span>
               </button>
-            </div>
+            </nav>
           </div>
         </div>
       )}
@@ -325,7 +345,7 @@ export default function App() {
 // --------------------- LOGIN VIEW ---------------------
 function LoginView({ onLogin }) {
   const [role, setRole] = useState('doctor'); // 'admin', 'doctor', 'patient'
-  const [username, setUsername] = useState('');
+  const [emailInput, setEmailInput] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -337,7 +357,7 @@ function LoginView({ onLogin }) {
 
     try {
       const details = new URLSearchParams();
-      details.append('username', username);
+      details.append('username', emailInput); // OAuth2 expects 'username' parameter
       details.append('password', password);
 
       const res = await fetch(`${API_BASE}/api/auth/token`, {
@@ -353,7 +373,6 @@ function LoginView({ onLogin }) {
 
       const data = await res.json();
       
-      // Enforce selected role matches token role
       if (data.role !== role) {
         throw new Error(`Account role is '${data.role}', but you selected '${role}' login.`);
       }
@@ -362,7 +381,7 @@ function LoginView({ onLogin }) {
         id: data.id,
         role: data.role,
         name: data.name,
-        username: data.username
+        email: data.email
       });
     } catch (err) {
       setError(err.message);
@@ -374,7 +393,6 @@ function LoginView({ onLogin }) {
   return (
     <div className="min-h-screen bg-background text-slate-100 flex items-center justify-center p-6 antialiased font-body">
       <div className="w-full max-w-md bg-surface border border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-        {/* Glow effect */}
         <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
         <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-secondary/15 rounded-full blur-2xl"></div>
 
@@ -383,14 +401,14 @@ function LoginView({ onLogin }) {
             <span className="material-symbols-outlined text-primary text-3xl font-bold">medical_services</span>
           </div>
           <h2 className="text-2xl font-black text-white tracking-tight">HeartCare AI Portal</h2>
-          <p className="text-xs text-slate-400 mt-1">Heart Disease Prediction and Clinical Management</p>
+          <p className="text-xs text-slate-400 mt-1">Heart Disease Prediction System</p>
         </div>
 
-        {/* Role Selector Tabs */}
+        {/* Role Selectors */}
         <div className="grid grid-cols-3 bg-slate-950 p-1.5 rounded-2xl mb-6 border border-slate-900">
           <button
             type="button"
-            onClick={() => { setRole('doctor'); setUsername(''); setPassword(''); }}
+            onClick={() => { setRole('doctor'); setEmailInput(''); setPassword(''); }}
             className={`py-2 rounded-xl text-xs font-bold transition-all ${
               role === 'doctor' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
             }`}
@@ -399,7 +417,7 @@ function LoginView({ onLogin }) {
           </button>
           <button
             type="button"
-            onClick={() => { setRole('admin'); setUsername(''); setPassword(''); }}
+            onClick={() => { setRole('admin'); setEmailInput(''); setPassword(''); }}
             className={`py-2 rounded-xl text-xs font-bold transition-all ${
               role === 'admin' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
             }`}
@@ -408,7 +426,7 @@ function LoginView({ onLogin }) {
           </button>
           <button
             type="button"
-            onClick={() => { setRole('patient'); setUsername(''); setPassword(''); }}
+            onClick={() => { setRole('patient'); setEmailInput(''); setPassword(''); }}
             className={`py-2 rounded-xl text-xs font-bold transition-all ${
               role === 'patient' ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
             }`}
@@ -423,17 +441,17 @@ function LoginView({ onLogin }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 relative">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-              {role === 'patient' ? 'Patient ID' : 'Username'}
+              {role === 'patient' ? 'Patient ID' : 'Doctor Email'}
             </label>
             <input
               type="text"
               required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder={role === 'patient' ? 'e.g. PAT-001' : 'Enter username'}
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              placeholder={role === 'patient' ? 'e.g. PAT-001' : 'doctor@heartcare.ai'}
               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
             />
           </div>
@@ -458,14 +476,13 @@ function LoginView({ onLogin }) {
             className="w-full mt-2 py-3 bg-primary hover:bg-teal-700 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {loading ? 'Authenticating...' : 'Sign In'}
-            {!loading && <span className="material-symbols-outlined text-sm">login</span>}
           </button>
         </form>
 
-        <div className="mt-8 text-center text-[10px] text-slate-500">
-          {role === 'admin' && 'System Seed Accounts: admin / admin123'}
-          {role === 'doctor' && 'System Seed Accounts: doctor / doctor123'}
-          {role === 'patient' && 'Use registered Patient ID as both username & password'}
+        <div className="mt-6 text-center text-[10px] text-slate-500">
+          {role === 'admin' && 'Seed Account: admin@heartcare.ai / admin123'}
+          {role === 'doctor' && 'Seed Account: doctor@heartcare.ai / doctor123'}
+          {role === 'patient' && 'Seed Account: Register a patient ID, then login with Patient ID / patient123'}
         </div>
       </div>
     </div>
@@ -502,8 +519,7 @@ function DashboardTab({ token, onNavigate }) {
       const res = await fetch(`${API_BASE}/api/reports/${predId}/pdf`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!res.ok) throw new Error("Failed to download PDF report");
-      
+      if (!res.ok) throw new Error("Failed to download PDF");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -513,204 +529,113 @@ function DashboardTab({ token, onNavigate }) {
       a.click();
       a.remove();
     } catch (error) {
-      alert("Error generating PDF: " + error.message);
+      alert("Error: " + error.message);
     }
   };
 
-  if (loading) return <div className="text-center py-12 text-slate-400 font-bold">Loading dashboard telemetry...</div>;
+  if (loading) return <div className="text-center py-12 text-slate-400">Loading diagnostic telemetry...</div>;
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* Welcome Banner */}
-      <div className="relative w-full h-48 rounded-3xl overflow-hidden group bg-gradient-to-r from-teal-950/40 via-surface to-background border border-slate-800 flex flex-col justify-center px-8">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent pointer-events-none"></div>
-        <h2 className="text-2xl md:text-3xl font-black text-white mb-2 leading-tight">
-          Cardiovascular Diagnostics <br/><span className="text-primary">Overview</span>
-        </h2>
-        <p className="text-slate-400 max-w-md text-xs md:text-sm">
-          Real-time diagnostics tracking powered by Random Forest heart disease prediction engine.
-        </p>
-      </div>
-
-      {/* Metrics Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Total Patients */}
-        <div className="glass-panel p-5 rounded-2xl metric-card-glow border-l-4 border-l-secondary">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Patients</span>
-            <span className="material-symbols-outlined text-secondary opacity-60">group</span>
-          </div>
+      {/* Top Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="glass-panel p-6 rounded-2xl border-l-4 border-l-secondary">
+          <div className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Total Patients</div>
           <div className="text-3xl font-black text-white">{stats?.total_patients || 0}</div>
-          <div className="mt-2 text-[10px] text-slate-500 font-medium">Registered profiles</div>
         </div>
-
-        {/* Predictions Made */}
-        <div className="glass-panel p-5 rounded-2xl metric-card-glow border-l-4 border-l-primary">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Predictions Made</span>
-            <span className="material-symbols-outlined text-primary opacity-60">neurology</span>
-          </div>
+        <div className="glass-panel p-6 rounded-2xl border-l-4 border-l-primary">
+          <div className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Predictions</div>
           <div className="text-3xl font-black text-white">{stats?.predictions_made || 0}</div>
-          <div className="mt-2 text-[10px] text-slate-500 font-medium">Executed scans</div>
         </div>
-
-        {/* High Risk Patients */}
-        <div className="glass-panel p-5 rounded-2xl metric-card-glow border-l-4 border-l-error">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-bold">High Risk</span>
-            <span className="material-symbols-outlined text-error opacity-60">emergency</span>
-          </div>
+        <div className="glass-panel p-6 rounded-2xl border-l-4 border-l-error">
+          <div className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">High Risk Patients</div>
           <div className="text-3xl font-black text-error">{stats?.high_risk_patients || 0}</div>
-          <div className="mt-2 text-[10px] text-error/60 font-medium">Urgent consultation</div>
         </div>
-
-        {/* Low Risk Patients */}
-        <div className="glass-panel p-5 rounded-2xl metric-card-glow border-l-4 border-l-accent">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-bold">Low Risk</span>
-            <span className="material-symbols-outlined text-accent opacity-60">verified_user</span>
-          </div>
+        <div className="glass-panel p-6 rounded-2xl border-l-4 border-l-accent">
+          <div className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Low Risk Patients</div>
           <div className="text-3xl font-black text-accent">{stats?.low_risk_patients || 0}</div>
-          <div className="mt-2 text-[10px] text-accent/60 font-medium">Routine monitoring</div>
-        </div>
-
-        {/* Accuracy */}
-        <div className="glass-panel p-5 rounded-2xl metric-card-glow border-l-4 border-l-warning">
-          <div className="flex justify-between items-start mb-4">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Model Accuracy</span>
-            <span className="material-symbols-outlined text-warning opacity-60">target</span>
-          </div>
-          <div className="text-3xl font-black text-white">{stats?.prediction_accuracy || 0}%</div>
-          <div className="mt-2 text-[10px] text-slate-500 font-medium">Baseline test score</div>
         </div>
       </div>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Predictions Table */}
-        <section className="lg:col-span-2">
-          <div className="glass-panel rounded-3xl overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
-              <div>
-                <h3 className="text-lg font-bold text-white">Recent Diagnostics</h3>
-                <p className="text-xs text-slate-400">Cardiovascular Risk Scan Logs</p>
-              </div>
-              <button 
-                onClick={() => onNavigate('patient_history')}
-                className="text-primary text-sm font-bold flex items-center gap-1 hover:underline cursor-pointer"
-              >
-                View History <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </button>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-slate-800/30">
-                  <tr>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Patient</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Risk Level</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Risk Index</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50">
-                  {stats?.recent_predictions && stats.recent_predictions.length > 0 ? (
-                    stats.recent_predictions.map((pred) => (
-                      <tr key={pred.id} className="hover:bg-slate-800/20 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">
-                              {pred.patient_name.split(' ').map(n=>n[0]).join('')}
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-sm font-semibold text-white">{pred.patient_name}</span>
-                              <span className="text-[10px] text-slate-500 font-medium">ID: {pred.patient_id}</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${
-                            pred.prediction_status === 'HIGH RISK'
-                              ? 'bg-red-950/40 text-red-400 border-red-900/50'
-                              : pred.prediction_status === 'MEDIUM RISK'
-                              ? 'bg-amber-950/40 text-amber-400 border-amber-900/50'
-                              : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/50'
-                          }`}>
-                            {pred.prediction_status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-xs font-semibold text-slate-200">
-                          {pred.risk_percentage}%
-                        </td>
-                        <td className="px-6 py-4 text-xs text-slate-400">
-                          {new Date(pred.date).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => handleDownloadPDF(pred.id, pred.patient_id)}
-                            className="p-1.5 hover:bg-slate-800 rounded-lg text-primary hover:text-teal-400 transition-all cursor-pointer flex items-center"
-                            title="Download PDF Report"
-                          >
-                            <span className="material-symbols-outlined text-lg">download</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5" className="px-6 py-8 text-center text-slate-500 font-medium">
-                        No prediction runs logged yet.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+      {/* Recent Predictions Table */}
+      <div className="glass-panel rounded-3xl overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
+          <div>
+            <h3 className="text-lg font-bold text-white">Recent predictions</h3>
+            <p className="text-xs text-slate-400">Chronological history logs</p>
           </div>
-        </section>
-
-        {/* Quick Actions / Alerts */}
-        <aside className="space-y-6">
-          <div 
-            onClick={() => onNavigate('new_prediction')}
-            className="relative rounded-3xl overflow-hidden p-6 border border-teal-800 bg-gradient-to-br from-teal-950/80 to-slate-950 group cursor-pointer hover:border-teal-500 transition-all"
+          <button 
+            onClick={() => onNavigate('patient_history')}
+            className="text-primary text-sm font-bold flex items-center gap-1 hover:underline cursor-pointer"
           >
-            <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors"></div>
-            <span className="material-symbols-outlined text-primary text-3xl mb-2">add_circle</span>
-            <h4 className="text-lg font-bold text-white">New Diagnosis</h4>
-            <p className="text-slate-400 text-xs mt-1">Start a new AI-assisted heart disease prediction scan for a registered patient.</p>
-          </div>
+            View History <span className="material-symbols-outlined text-sm">arrow_forward</span>
+          </button>
+        </div>
 
-          <div className="glass-panel p-6 rounded-3xl space-y-4">
-            <h4 className="font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
-              <span className="material-symbols-outlined text-warning">clinical_notes</span>
-              Clinical Guidelines
-            </h4>
-            <ul className="space-y-3 text-xs text-slate-400">
-              <li className="flex gap-2">
-                <span className="text-primary font-bold">1.</span>
-                <span>Register the patient details first before running the AI assessment.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-primary font-bold">2.</span>
-                <span>Values such as Cholesterol and Blood Pressure must be from recent clinical lab results.</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-primary font-bold">3.</span>
-                <span>PDF reports will include the logged physician's verified signature block.</span>
-              </li>
-            </ul>
-          </div>
-        </aside>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-slate-800/30">
+              <tr>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Patient</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Prediction</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Risk %</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confidence</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</th>
+                <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Report</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/50">
+              {stats?.recent_predictions && stats.recent_predictions.length > 0 ? (
+                stats.recent_predictions.map((pred) => (
+                  <tr key={pred.id} className="hover:bg-slate-800/20 transition-colors">
+                    <td className="px-6 py-4 text-sm font-semibold text-white">{pred.patient_name}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${
+                        pred.prediction_status === 'HIGH RISK'
+                          ? 'bg-red-950/40 text-red-400 border-red-900/50'
+                          : pred.prediction_status === 'MEDIUM RISK'
+                          ? 'bg-amber-950/40 text-amber-400 border-amber-900/50'
+                          : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/50'
+                      }`}>
+                        {pred.prediction_status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-xs font-semibold text-slate-200">{pred.risk_percentage}%</td>
+                    <td className="px-6 py-4 text-xs font-semibold text-primary">{pred.prediction_confidence}%</td>
+                    <td className="px-6 py-4 text-xs text-slate-400">{new Date(pred.date).toLocaleDateString()}</td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => handleDownloadPDF(pred.id, pred.patient_id)}
+                        className="text-primary hover:underline font-bold text-xs cursor-pointer flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-sm">download</span> PDF
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="px-6 py-8 text-center text-slate-500 font-medium">
+                    No diagnostics logged.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 }
 
-// --------------------- REGISTER PATIENT VIEW ---------------------
-function RegisterPatientTab({ token }) {
-  const [patientId, setPatientId] = useState('');
+// --------------------- PATIENTS VIEW (LIST & REGISTRATION) ---------------------
+function PatientsTab({ token }) {
+  const [view, setView] = useState('list'); // 'list' or 'add'
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Form states
+  const [id, setId] = useState('');
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('Male');
@@ -718,16 +643,37 @@ function RegisterPatientTab({ token }) {
   const [email, setEmail] = useState('');
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
-  
+
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
+
+  const fetchPatients = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/patients/`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPatients(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (view === 'list') {
+      fetchPatients();
+    }
+  }, [view, token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setLoading(true);
 
     try {
       const res = await fetch(`${API_BASE}/api/patients/`, {
@@ -737,7 +683,7 @@ function RegisterPatientTab({ token }) {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          patient_id: patientId.trim(),
+          id: id.trim(),
           name: name.trim(),
           age: parseInt(age),
           gender,
@@ -753,9 +699,8 @@ function RegisterPatientTab({ token }) {
         throw new Error(err.detail || "Registration failed");
       }
 
-      setSuccess(`Patient "${name}" registered successfully!`);
-      // Reset form
-      setPatientId('');
+      setSuccess("Patient profile created successfully!");
+      setId('');
       setName('');
       setAge('');
       setPhone('');
@@ -764,149 +709,208 @@ function RegisterPatientTab({ token }) {
       setWeight('');
     } catch (err) {
       setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto glass-panel p-8 rounded-3xl animate-fadeIn">
-      <div className="border-b border-slate-800 pb-4 mb-6">
-        <h3 className="text-xl font-bold text-white">Patient Profile Registration</h3>
-        <p className="text-xs text-slate-400 mt-1">Create a clinical health chart record for diagnostics tracking.</p>
+    <div className="space-y-6 animate-fadeIn">
+      {/* Toggle Header */}
+      <div className="flex justify-between items-center bg-surface p-4 rounded-2xl border border-slate-800">
+        <h3 className="font-bold text-white text-lg">Patient Management</h3>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setView('list')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              view === 'list' ? 'bg-primary text-white' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Patient List
+          </button>
+          <button
+            onClick={() => setView('add')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              view === 'add' ? 'bg-primary text-white' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Add Patient
+          </button>
+        </div>
       </div>
 
-      {error && <div className="mb-4 p-3 bg-red-950/40 border border-red-900/50 text-red-400 text-xs rounded-xl">{error}</div>}
-      {success && <div className="mb-4 p-3 bg-emerald-950/40 border border-emerald-900/50 text-emerald-400 text-xs rounded-xl">{success}</div>}
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Patient ID *</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. PAT-983"
-              value={patientId}
-              onChange={(e) => setPatientId(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Full Name *</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Alice Mercer"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Age *</label>
-            <input
-              type="number"
-              required
-              placeholder="Age in years"
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Gender *</label>
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
-            >
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Phone Number</label>
-            <input
-              type="text"
-              placeholder="555-0100"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
-            <input
-              type="email"
-              placeholder="alice@mail.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Height (cm)</label>
-            <input
-              type="number"
-              placeholder="Height in cm"
-              value={height}
-              onChange={(e) => setHeight(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Weight (kg)</label>
-            <input
-              type="number"
-              placeholder="Weight in kg"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
-            />
-          </div>
+      {view === 'list' ? (
+        <div className="glass-panel rounded-3xl overflow-hidden">
+          {loading ? (
+            <div className="text-center py-12 text-slate-400">Loading patients...</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-slate-800/30">
+                  <tr>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Name</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Age/Gender</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">H/W Index</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/50">
+                  {patients.length > 0 ? (
+                    patients.map((p) => (
+                      <tr key={p.id} className="hover:bg-slate-800/10">
+                        <td className="px-6 py-4 text-xs font-bold text-slate-300">{p.id}</td>
+                        <td className="px-6 py-4 text-sm font-semibold text-white">{p.name}</td>
+                        <td className="px-6 py-4 text-xs text-slate-300">{p.age} yrs / {p.gender}</td>
+                        <td className="px-6 py-4 text-xs text-slate-400">
+                          <div>{p.phone || 'No phone'}</div>
+                          <div>{p.email || 'No email'}</div>
+                        </td>
+                        <td className="px-6 py-4 text-xs text-slate-450">
+                          {p.height ? `${p.height} cm` : 'N/A'} / {p.weight ? `${p.weight} kg` : 'N/A'}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-8 text-center text-slate-500 font-medium">No patient profiles registered.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
+      ) : (
+        <div className="max-w-2xl mx-auto glass-panel p-8 rounded-3xl">
+          <div className="border-b border-slate-800 pb-4 mb-6">
+            <h4 className="font-bold text-white text-md">Register New Patient Profile</h4>
+            <p className="text-xs text-slate-400 mt-1">Fields marked * are mandatory.</p>
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3.5 bg-primary hover:bg-teal-700 text-white font-bold rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-4"
-        >
-          {loading ? 'Creating Profile...' : 'Register Profile'}
-          {!loading && <span className="material-symbols-outlined text-sm">person_add</span>}
-        </button>
-      </form>
+          {error && <div className="mb-4 p-3 bg-red-950/40 border border-red-900/50 text-red-400 text-xs rounded-xl">{error}</div>}
+          {success && <div className="mb-4 p-3 bg-emerald-950/40 border border-emerald-900/50 text-emerald-400 text-xs rounded-xl">{success}</div>}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Patient ID *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. PAT-001"
+                  value={id}
+                  onChange={(e) => setId(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Full Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Patient name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Age *</label>
+                <input
+                  type="number"
+                  required
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Gender *</label>
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Phone</label>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Height (cm)</label>
+                <input
+                  type="number"
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Weight (kg)</label>
+                <input
+                  type="number"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3.5 bg-primary hover:bg-teal-700 text-white font-bold rounded-xl transition-all cursor-pointer mt-4"
+            >
+              Register Profile
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
 
-// --------------------- HEALTH DATA FORM & PREDICTION tab ---------------------
-function NewPredictionTab({ token, onNavigate }) {
+// --------------------- PREDICTION VIEW ---------------------
+function PredictionTab({ token, onNavigate }) {
   const [patients, setPatients] = useState([]);
   const [selectedPatientId, setSelectedPatientId] = useState('');
   
-  // Health Form States
+  // Clinical Metric States
   const [age, setAge] = useState('');
-  const [sex, setSex] = useState('1'); // 1 = Male, 0 = Female
-  const [cp, setCp] = useState('4');   // Chest Pain Type (1, 2, 3, 4)
-  const [trestbps, setTrestbps] = useState('120'); // Resting BP
-  const [chol, setChol] = useState('200');         // Cholesterol
-  const [fbs, setFbs] = useState('0');             // Fasting Blood Sugar
-  const [restecg, setRestecg] = useState('0');     // Rest ECG
-  const [thalach, setThalach] = useState('150');     // Max Heart Rate
-  const [exang, setExang] = useState('0');         // Exercise Angina
-  const [oldpeak, setOldpeak] = useState('0.0');     // ST Depression
-  const [slope, setSlope] = useState('2');         // Slope
-  const [ca, setCa] = useState('0');               // Vessels
-  const [thal, setThal] = useState('3');           // Thalassemia
-  const [recommendation, setRecommendation] = useState('');
+  const [sex, setSex] = useState('1');
+  const [cp, setCp] = useState('4');
+  const [trestbps, setTrestbps] = useState('120');
+  const [chol, setChol] = useState('200');
+  const [fbs, setFbs] = useState('0');
+  const [restecg, setRestecg] = useState('0');
+  const [thalach, setThalach] = useState('150');
+  const [exang, setExang] = useState('0');
+  const [oldpeak, setOldpeak] = useState('0.0');
+  const [slope, setSlope] = useState('2');
+  const [ca, setCa] = useState('0');
+  const [thal, setThal] = useState('3');
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -923,17 +927,16 @@ function NewPredictionTab({ token, onNavigate }) {
           setPatients(data);
         }
       } catch (err) {
-        console.error("Failed to load patients list", err);
+        console.error(err);
       }
     };
     fetchPatients();
   }, [token]);
 
-  // Autofill age and gender when patient changes
   const handlePatientChange = (e) => {
     const pid = e.target.value;
     setSelectedPatientId(pid);
-    const p = patients.find(pat => pat.patient_id === pid);
+    const p = patients.find(pat => pat.id === pid);
     if (p) {
       setAge(p.age.toString());
       setSex(p.gender === 'Male' ? '1' : '0');
@@ -947,7 +950,7 @@ function NewPredictionTab({ token, onNavigate }) {
     setLoading(true);
 
     if (!selectedPatientId) {
-      setError("Please select a registered patient.");
+      setError("Please select a registered patient profile.");
       setLoading(false);
       return;
     }
@@ -973,14 +976,13 @@ function NewPredictionTab({ token, onNavigate }) {
           oldpeak: parseFloat(oldpeak),
           slope: parseInt(slope),
           ca: parseInt(ca),
-          thal: parseInt(thal),
-          doctor_recommendation: recommendation.trim() || null
+          thal: parseInt(thal)
         })
       });
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.detail || "AI engine prediction fail");
+        throw new Error(err.detail || "Prediction request failed");
       }
 
       const data = await res.json();
@@ -998,7 +1000,7 @@ function NewPredictionTab({ token, onNavigate }) {
       const res = await fetch(`${API_BASE}/api/reports/${result.id}/pdf`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!res.ok) throw new Error("Failed to generate PDF");
+      if (!res.ok) throw new Error("Failed to download PDF");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1016,32 +1018,28 @@ function NewPredictionTab({ token, onNavigate }) {
     <div className="space-y-8 animate-fadeIn">
       <div className="glass-panel p-8 rounded-3xl">
         <div className="border-b border-slate-800 pb-4 mb-6">
-          <h3 className="text-xl font-bold text-white">AI Heart Disease Prediction Scan</h3>
-          <p className="text-xs text-slate-400 mt-1">Submit clinical diagnostics features to run neural classifier prediction.</p>
+          <h3 className="text-xl font-bold text-white">Clinical Risk Predictor (Mock)</h3>
+          <p className="text-xs text-slate-400 mt-1">Submit clinical values. Mock responses operate in Step 1.</p>
         </div>
 
         {error && <div className="mb-4 p-3 bg-red-950/40 border border-red-900/50 text-red-400 text-xs rounded-xl">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Patient Selection */}
           <div className="max-w-md">
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Select Registered Patient *</label>
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Select Patient Profile *</label>
             <select
               value={selectedPatientId}
               onChange={handlePatientChange}
               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
             >
-              <option value="">-- Choose Patient Profile --</option>
+              <option value="">-- Select Registered Patient --</option>
               {patients.map(p => (
-                <option key={p.patient_id} value={p.patient_id}>
-                  {p.name} (ID: {p.patient_id}, Age: {p.age})
-                </option>
+                <option key={p.id} value={p.id}>{p.name} (ID: {p.id})</option>
               ))}
             </select>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6 pt-4 border-t border-slate-800">
-            {/* Age */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Age</label>
               <input
@@ -1053,7 +1051,6 @@ function NewPredictionTab({ token, onNavigate }) {
               />
             </div>
 
-            {/* Sex */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Sex</label>
               <select
@@ -1066,7 +1063,6 @@ function NewPredictionTab({ token, onNavigate }) {
               </select>
             </div>
 
-            {/* Chest Pain Type */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Chest Pain Type</label>
               <select
@@ -1081,7 +1077,6 @@ function NewPredictionTab({ token, onNavigate }) {
               </select>
             </div>
 
-            {/* Resting BP */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Resting BP (mmHg)</label>
               <input
@@ -1093,7 +1088,6 @@ function NewPredictionTab({ token, onNavigate }) {
               />
             </div>
 
-            {/* Cholesterol */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Cholesterol (mg/dL)</label>
               <input
@@ -1105,7 +1099,6 @@ function NewPredictionTab({ token, onNavigate }) {
               />
             </div>
 
-            {/* Fasting Blood Sugar */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Fasting Sugar &gt; 120</label>
               <select
@@ -1118,7 +1111,6 @@ function NewPredictionTab({ token, onNavigate }) {
               </select>
             </div>
 
-            {/* Rest ECG */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Rest ECG Result</label>
               <select
@@ -1132,9 +1124,8 @@ function NewPredictionTab({ token, onNavigate }) {
               </select>
             </div>
 
-            {/* Max Heart Rate */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Max Heart Rate achieved</label>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Max Heart Rate (bpm)</label>
               <input
                 type="number"
                 required
@@ -1144,7 +1135,6 @@ function NewPredictionTab({ token, onNavigate }) {
               />
             </div>
 
-            {/* Exercise Angina */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Ex. Induced Angina</label>
               <select
@@ -1157,7 +1147,6 @@ function NewPredictionTab({ token, onNavigate }) {
               </select>
             </div>
 
-            {/* Oldpeak ST Depression */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">ST Depression (Oldpeak)</label>
               <input
@@ -1170,9 +1159,8 @@ function NewPredictionTab({ token, onNavigate }) {
               />
             </div>
 
-            {/* Slope */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">ST Slope Segment</label>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Slope of ST Segment</label>
               <select
                 value={slope}
                 onChange={(e) => setSlope(e.target.value)}
@@ -1184,7 +1172,6 @@ function NewPredictionTab({ token, onNavigate }) {
               </select>
             </div>
 
-            {/* ca Vessels */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Major Vessels (0-3)</label>
               <select
@@ -1199,7 +1186,6 @@ function NewPredictionTab({ token, onNavigate }) {
               </select>
             </div>
 
-            {/* Thalassemia */}
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Thalassemia</label>
               <select
@@ -1214,90 +1200,56 @@ function NewPredictionTab({ token, onNavigate }) {
             </div>
           </div>
 
-          <div className="pt-4 border-t border-slate-800">
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Physician Recommendation Override (Optional)</label>
-            <textarea
-              placeholder="Provide custom cardiologist recommendations here, or leave blank to auto-generate default instructions based on risk status."
-              value={recommendation}
-              onChange={(e) => setRecommendation(e.target.value)}
-              rows="3"
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-sm"
-            />
-          </div>
-
           <button
             type="submit"
             disabled={loading}
             className="w-full py-4 bg-primary hover:bg-teal-700 text-white font-bold rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
-            {loading ? 'Evaluating Health Data...' : 'Run AI Prediction'}
-            {!loading && <span className="material-symbols-outlined text-sm">neurology</span>}
+            {loading ? 'Processing scan...' : 'Run AI Prediction'}
           </button>
         </form>
       </div>
 
-      {/* Results Panel */}
       {result && (
         <div className="glass-panel p-8 rounded-3xl border-l-8 border-l-primary relative overflow-hidden animate-slideUp">
-          <div className="absolute -top-12 -right-12 w-48 h-48 bg-primary/10 rounded-full blur-3xl"></div>
-          
           <div className="border-b border-slate-800 pb-4 mb-6">
-            <h4 className="text-lg font-bold text-white">AI Prediction Diagnostics Outcome</h4>
-            <p className="text-xs text-slate-400 mt-1">Generated by neural network classifier on medical records.</p>
+            <h4 className="text-lg font-bold text-white">Diagnostics Outcome (Mock prediction)</h4>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
-            {/* Risk Status */}
             <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800">
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Heart Disease Risk</div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">AI Assessment Risk</div>
               <div className={`text-2xl font-black ${
-                result.prediction_status === 'HIGH RISK'
-                  ? 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]'
-                  : result.prediction_status === 'MEDIUM RISK'
-                  ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.3)]'
-                  : 'text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]'
+                result.prediction === 'HIGH RISK' ? 'text-red-405' : result.prediction === 'MEDIUM RISK' ? 'text-amber-405' : 'text-emerald-405'
               }`}>
-                {result.prediction_status}
+                {result.prediction}
               </div>
             </div>
 
-            {/* Risk Index */}
             <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800">
               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Risk Percentage</div>
               <div className="text-3xl font-black text-white">{result.risk_percentage}%</div>
             </div>
 
-            {/* Confidence */}
             <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800">
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Prediction Confidence</div>
-              <div className="text-3xl font-black text-primary">{result.prediction_confidence}%</div>
-            </div>
-          </div>
-
-          {/* Recommendations */}
-          <div className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl space-y-3 mb-6">
-            <h5 className="font-bold text-white flex items-center gap-2 text-sm border-b border-slate-850 pb-2">
-              <span className="material-symbols-outlined text-primary text-base">verified</span>
-              Clinical Recommendations
-            </h5>
-            <div className="text-xs leading-relaxed text-slate-300 whitespace-pre-line">
-              {result.doctor_recommendation}
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">AI Confidence</div>
+              <div className="text-3xl font-black text-primary">{result.confidence}%</div>
             </div>
           </div>
 
           <div className="flex gap-4">
             <button
               onClick={handleDownloadPDF}
-              className="py-3 px-6 bg-primary hover:bg-teal-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer active:scale-95"
+              className="py-3 px-6 bg-primary hover:bg-teal-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer"
             >
               <span className="material-symbols-outlined">download</span>
               Download PDF Report
             </button>
             <button
               onClick={() => onNavigate('patient_history')}
-              className="py-3 px-6 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all border border-slate-700 cursor-pointer active:scale-95"
+              className="py-3 px-6 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all border border-slate-705 cursor-pointer"
             >
-              View in Log History
+              View History Log
             </button>
           </div>
         </div>
@@ -1336,8 +1288,7 @@ function PatientHistoryTab({ token, user }) {
       const res = await fetch(`${API_BASE}/api/reports/${predId}/pdf`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!res.ok) throw new Error("Failed to download PDF report");
-      
+      if (!res.ok) throw new Error("Failed to download PDF");
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1347,19 +1298,17 @@ function PatientHistoryTab({ token, user }) {
       a.click();
       a.remove();
     } catch (error) {
-      alert("Error generating PDF: " + error.message);
+      alert("Error: " + error.message);
     }
   };
 
-  if (loading) return <div className="text-center py-12 text-slate-400 font-bold">Loading diagnostic logs...</div>;
+  if (loading) return <div className="text-center py-12 text-slate-400 font-bold">Loading logs...</div>;
 
   return (
     <div className="glass-panel rounded-3xl overflow-hidden animate-fadeIn">
       <div className="px-6 py-5 border-b border-slate-800 bg-slate-900/40">
-        <h3 className="text-lg font-bold text-white">
-          {user.role === 'patient' ? 'My Cardiovascular Diagnostic Logs' : 'All Patient Diagnostics History'}
-        </h3>
-        <p className="text-xs text-slate-400 mt-0.5">Historical log records of predictions made on patients.</p>
+        <h3 className="text-lg font-bold text-white">Diagnostics History Log</h3>
+        <p className="text-xs text-slate-400 mt-0.5">Historical records of heart disease predictions.</p>
       </div>
 
       <div className="overflow-x-auto">
@@ -1368,11 +1317,11 @@ function PatientHistoryTab({ token, user }) {
             <tr>
               <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">ID</th>
               <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Patient ID</th>
-              <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Risk Level</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Prediction</th>
               <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Risk Index</th>
               <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Confidence</th>
               <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date / Time</th>
-              <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Report</th>
+              <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/50">
@@ -1383,39 +1332,114 @@ function PatientHistoryTab({ token, user }) {
                   <td className="px-6 py-4 text-sm font-semibold text-white">{pred.patient_id}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${
-                      pred.prediction_status === 'HIGH RISK'
-                        ? 'bg-red-950/40 text-red-400 border-red-900/50'
-                        : pred.prediction_status === 'MEDIUM RISK'
-                        ? 'bg-amber-950/40 text-amber-400 border-amber-900/50'
-                        : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/50'
+                      pred.prediction === 'HIGH RISK' ? 'bg-red-950/40 text-red-400 border-red-900/50' : pred.prediction === 'MEDIUM RISK' ? 'bg-amber-950/40 text-amber-400 border-amber-900/50' : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/50'
                     }`}>
-                      {pred.prediction_status}
+                      {pred.prediction}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-xs font-bold text-slate-200">{pred.risk_percentage}%</td>
-                  <td className="px-6 py-4 text-xs text-primary font-medium">{pred.prediction_confidence}%</td>
+                  <td className="px-6 py-4 text-xs text-primary font-medium">{pred.confidence}%</td>
                   <td className="px-6 py-4 text-xs text-slate-400">{new Date(pred.date).toLocaleString()}</td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => handleDownloadPDF(pred.id, pred.patient_id)}
-                      className="py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-primary text-xs font-bold border border-slate-700 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                      className="py-1 px-2.5 bg-slate-800 hover:bg-slate-700 text-primary text-xs font-bold border border-slate-700 rounded-lg cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-[14px]">download</span>
-                      PDF
+                      Report
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="px-6 py-8 text-center text-slate-500 font-medium">
-                  No prediction log history found.
-                </td>
+                <td colSpan="7" className="px-6 py-8 text-center text-slate-500 font-medium">No history logged.</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+// --------------------- REPORTS tab VIEW ---------------------
+function ReportsTab({ token }) {
+  const [predictions, setPredictions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/predictions/history`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setPredictions(data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHistory();
+  }, [token]);
+
+  const handleDownloadPDF = async (predId, patientId) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/reports/${predId}/pdf`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Failed to download PDF");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `HeartCare_Report_${patientId}_${predId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
+  };
+
+  return (
+    <div className="glass-panel p-8 rounded-3xl space-y-6 animate-fadeIn">
+      <div className="border-b border-slate-800 pb-4">
+        <h3 className="text-xl font-bold text-white">Diagnostic Reports Directory</h3>
+        <p className="text-xs text-slate-400 mt-1">Download official PDF medical report records of predictions.</p>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12 text-slate-400">Loading reports directory...</div>
+      ) : predictions.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {predictions.map(pred => (
+            <div key={pred.id} className="p-5 bg-slate-900/50 rounded-2xl border border-slate-800 flex justify-between items-center">
+              <div>
+                <h5 className="font-bold text-white text-sm">Patient ID: {pred.patient_id}</h5>
+                <p className="text-xs text-slate-450 mt-1">Date: {new Date(pred.date).toLocaleDateString()}</p>
+                <div className="mt-2 text-xs flex gap-2">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                    pred.prediction === 'HIGH RISK' ? 'bg-red-950/40 text-red-400 border-red-900/50' : pred.prediction === 'MEDIUM RISK' ? 'bg-amber-950/40 text-amber-400 border-amber-900/50' : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/50'
+                  }`}>{pred.prediction}</span>
+                  <span className="text-slate-400">Risk: {pred.risk_percentage}%</span>
+                </div>
+              </div>
+              <button
+                onClick={() => handleDownloadPDF(pred.id, pred.patient_id)}
+                className="px-4 py-2 bg-primary hover:bg-teal-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[14px]">download</span> PDF Report
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 text-slate-500 font-medium">No diagnostic reports logged yet.</div>
+      )}
     </div>
   );
 }
@@ -1444,10 +1468,9 @@ function AnalyticsTab({ token }) {
     fetchChartData();
   }, [token]);
 
-  if (loading) return <div className="text-center py-12 text-slate-400 font-bold">Loading analytical charts...</div>;
-  if (!chartData) return <div className="text-center py-12 text-red-400 font-bold">Failed to load analytics charts.</div>;
+  if (loading) return <div className="text-center py-12 text-slate-400">Loading charts...</div>;
+  if (!chartData) return <div className="text-center py-12 text-red-405">Failed to fetch analytics charts.</div>;
 
-  // Chart configs
   const genderChart = {
     labels: chartData.gender_distribution.labels,
     datasets: [{
@@ -1494,19 +1517,11 @@ function AnalyticsTab({ token }) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 } }
-      }
+      legend: { labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } }
     },
     scales: {
-      y: {
-        grid: { color: '#1e293b' },
-        ticks: { color: '#94a3b8' }
-      },
-      x: {
-        grid: { display: false },
-        ticks: { color: '#94a3b8' }
-      }
+      y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+      x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
     }
   };
 
@@ -1514,16 +1529,12 @@ function AnalyticsTab({ token }) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        position: 'bottom',
-        labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 } }
-      }
+      legend: { position: 'bottom', labels: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } }
     }
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fadeIn">
-      {/* Risk Level Distribution */}
       <div className="glass-panel p-6 rounded-3xl h-80 flex flex-col">
         <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Patient Risk Class Levels</h4>
         <div className="flex-1 relative">
@@ -1531,7 +1542,6 @@ function AnalyticsTab({ token }) {
         </div>
       </div>
 
-      {/* Male vs Female */}
       <div className="glass-panel p-6 rounded-3xl h-80 flex flex-col">
         <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Gender Demographics</h4>
         <div className="flex-1 relative">
@@ -1539,7 +1549,6 @@ function AnalyticsTab({ token }) {
         </div>
       </div>
 
-      {/* Age Distribution */}
       <div className="glass-panel p-6 rounded-3xl h-80 flex flex-col">
         <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Age Group Distribution</h4>
         <div className="flex-1 relative">
@@ -1547,9 +1556,8 @@ function AnalyticsTab({ token }) {
         </div>
       </div>
 
-      {/* Predictions Monthly Timeline */}
       <div className="glass-panel p-6 rounded-3xl h-80 flex flex-col">
-        <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Monthly Predictions Run Activity</h4>
+        <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Monthly Predictions timeline</h4>
         <div className="flex-1 relative">
           <Line data={timelineChart} options={optionsDark} />
         </div>
@@ -1558,22 +1566,24 @@ function AnalyticsTab({ token }) {
   );
 }
 
-// --------------------- ADMIN PANEL VIEW ---------------------
-function AdminPanelTab({ token }) {
+// --------------------- SETTINGS tab VIEW ---------------------
+function SettingsTab({ token, user }) {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // New Doctor Form States
+  // New Doctor Account Form
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
   
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   const fetchDoctors = async () => {
+    if (user.role !== 'admin') {
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE}/api/auth/doctors`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -1591,7 +1601,7 @@ function AdminPanelTab({ token }) {
 
   useEffect(() => {
     fetchDoctors();
-  }, [token]);
+  }, [token, user]);
 
   const handleAddDoctor = async (e) => {
     e.preventDefault();
@@ -1606,26 +1616,23 @@ function AdminPanelTab({ token }) {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          username: username.trim(),
+          username: username.trim(), // API parameter maps email to username internally
+          email: username.trim(),
           password,
           role: 'doctor',
-          name: name.trim(),
-          phone: phone.trim() || null,
-          email: email.trim() || null
+          name: name.trim()
         })
       });
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.detail || "Failed to add doctor");
+        throw new Error(err.detail || "Failed to create doctor account");
       }
 
-      setSuccess(`Doctor "${name}" created successfully.`);
+      setSuccess(`Doctor account "${name}" created successfully.`);
       setUsername('');
       setPassword('');
       setName('');
-      setPhone('');
-      setEmail('');
       fetchDoctors();
     } catch (err) {
       setError(err.message);
@@ -1633,7 +1640,7 @@ function AdminPanelTab({ token }) {
   };
 
   const handleDeleteDoctor = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this doctor?")) return;
+    if (!window.confirm("Are you sure?")) return;
     setError('');
     setSuccess('');
 
@@ -1642,181 +1649,131 @@ function AdminPanelTab({ token }) {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-
-      if (!res.ok) {
-        throw new Error("Failed to delete doctor account");
-      }
-
-      setSuccess("Doctor deleted successfully.");
+      if (!res.ok) throw new Error("Delete failed");
+      setSuccess("Physician profile removed.");
       fetchDoctors();
     } catch (err) {
       setError(err.message);
     }
   };
 
-  const handleExportData = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/predictions/history`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error("Failed to fetch history data for export");
-      const data = await res.json();
-      
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `HeartCare_Diagnostics_Export_${new Date().toISOString().slice(0,10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch (err) {
-      alert("Export fail: " + err.message);
-    }
-  };
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fadeIn">
-      {/* Create Doctor Form */}
-      <div className="glass-panel p-6 rounded-3xl h-fit">
-        <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider border-b border-slate-800 pb-2">Add New Physician</h4>
-        {error && <div className="mb-4 p-2 bg-red-950/40 border border-red-900/50 text-red-400 text-xs rounded-xl">{error}</div>}
-        {success && <div className="mb-4 p-2 bg-emerald-950/40 border border-emerald-900/50 text-emerald-400 text-xs rounded-xl">{success}</div>}
-
-        <form onSubmit={handleAddDoctor} className="space-y-4">
+    <div className="space-y-6 animate-fadeIn">
+      {/* Profile Overview */}
+      <div className="glass-panel p-6 rounded-3xl">
+        <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider border-b border-slate-800 pb-2">Profile Information</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Username *</label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-xs"
-            />
+            <span className="text-slate-400 font-bold">User Name:</span> <span className="text-white font-semibold">{user.name}</span>
           </div>
-
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Password *</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-xs"
-            />
+            <span className="text-slate-400 font-bold">Role:</span> <span className="text-primary font-bold uppercase">{user.role}</span>
           </div>
-
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Doctor Name *</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Dr. Sarah Connor"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-xs"
-            />
+            <span className="text-slate-400 font-bold">Email / ID:</span> <span className="text-white">{user.email}</span>
           </div>
-
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Phone</label>
-            <input
-              type="text"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-xs"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-xs"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-2.5 bg-primary hover:bg-teal-700 text-white font-bold rounded-xl transition-all shadow-md cursor-pointer"
-          >
-            Add Doctor
-          </button>
-        </form>
+        </div>
       </div>
 
-      {/* List Doctors and Export */}
-      <div className="lg:col-span-2 space-y-6">
-        <div className="glass-panel rounded-3xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
-            <h4 className="font-bold text-white text-sm uppercase tracking-wider">Registered Doctors</h4>
-            <span className="px-2 py-0.5 bg-slate-800 rounded-lg text-slate-400 text-xs font-bold">{doctors.length}</span>
+      {user.role === 'admin' && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Add Doctor Form */}
+          <div className="glass-panel p-6 rounded-3xl h-fit">
+            <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider border-b border-slate-800 pb-2">Add Physician</h4>
+            {error && <div className="mb-4 p-2 bg-red-950/40 border border-red-900/50 text-red-400 text-xs rounded-xl">{error}</div>}
+            {success && <div className="mb-4 p-2 bg-emerald-950/40 border border-emerald-900/50 text-emerald-400 text-xs rounded-xl">{success}</div>}
+
+            <form onSubmit={handleAddDoctor} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Doctor Email *</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. sarah@heartcare.ai"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Password *</label>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Dr. Sarah Connor"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:border-primary focus:outline-none text-white text-xs"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2 bg-primary hover:bg-teal-700 text-white font-bold rounded-xl transition-all cursor-pointer"
+              >
+                Create Account
+              </button>
+            </form>
           </div>
 
-          <div className="overflow-y-auto max-h-96">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-slate-800/30">
-                <tr>
-                  <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Name</th>
-                  <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Username</th>
-                  <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contact</th>
-                  <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50 text-xs">
-                {loading ? (
+          {/* List Doctors */}
+          <div className="lg:col-span-2 glass-panel rounded-3xl overflow-hidden h-fit">
+            <div className="px-6 py-4 border-b border-slate-800 bg-slate-900/40">
+              <h4 className="font-bold text-white text-sm uppercase tracking-wider">Registered Physicians</h4>
+            </div>
+
+            <div className="overflow-y-auto max-h-96">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-slate-800/30">
                   <tr>
-                    <td colSpan="4" className="px-6 py-4 text-slate-400 font-bold">Loading...</td>
+                    <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Name</th>
+                    <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email</th>
+                    <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Action</th>
                   </tr>
-                ) : doctors.length > 0 ? (
-                  doctors.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-slate-800/10">
-                      <td className="px-6 py-3 font-semibold text-white">{doc.name}</td>
-                      <td className="px-6 py-3 text-slate-400">{doc.username}</td>
-                      <td className="px-6 py-3">
-                        <div className="flex flex-col">
-                          <span>{doc.email || 'N/A'}</span>
-                          <span className="text-[10px] text-slate-500">{doc.phone || ''}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-3">
-                        <button
-                          onClick={() => handleDeleteDoctor(doc.id)}
-                          className="p-1 hover:bg-slate-800 text-red-400 hover:text-red-300 rounded cursor-pointer flex items-center"
-                          title="Delete Doctor"
-                        >
-                          <span className="material-symbols-outlined text-base">delete</span>
-                        </button>
-                      </td>
+                </thead>
+                <tbody className="divide-y divide-slate-800/50 text-xs">
+                  {loading ? (
+                    <tr>
+                      <td colSpan="3" className="px-6 py-4 text-slate-400 font-bold">Loading...</td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="px-6 py-4 text-center text-slate-500 font-semibold">No doctors registered.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  ) : doctors.length > 0 ? (
+                    doctors.map((doc) => (
+                      <tr key={doc.id} className="hover:bg-slate-800/10">
+                        <td className="px-6 py-3 font-semibold text-white">{doc.name}</td>
+                        <td className="px-6 py-3 text-slate-400">{doc.email}</td>
+                        <td className="px-6 py-3">
+                          <button
+                            onClick={() => handleDeleteDoctor(doc.id)}
+                            className="text-red-400 hover:text-red-300 font-bold cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="3" className="px-6 py-4 text-center text-slate-500">No physicians registered.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-
-        {/* Database Export Utility */}
-        <div className="glass-panel p-6 rounded-3xl flex justify-between items-center bg-slate-900/20">
-          <div>
-            <h4 className="font-bold text-white text-sm uppercase tracking-wider">System Database Data Export</h4>
-            <p className="text-slate-400 text-xs mt-1">Export full diagnostic history logs in JSON database format.</p>
-          </div>
-          <button
-            onClick={handleExportData}
-            className="py-2.5 px-4 bg-teal-950/60 border border-teal-900/60 text-primary hover:bg-teal-900/40 rounded-xl font-bold flex items-center gap-2 transition-all cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-sm">database</span>
-            Export Data
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

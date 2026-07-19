@@ -48,9 +48,14 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     except JWTError:
         raise credentials_exception
         
-    user = db.query(User).filter(User.username == username).first()
+    user = db.query(User).filter(User.email == username).first()
     if user is None:
-        raise credentials_exception
+        from database.db import Patient
+        patient = db.query(Patient).filter(Patient.id == username).first()
+        if patient:
+            user = User(id=-1, name=patient.name, email=patient.id, role="patient")
+        else:
+            raise credentials_exception
     return user
 
 def check_role(roles: list[str]):
