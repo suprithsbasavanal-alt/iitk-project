@@ -11,4 +11,5 @@ numpy
 reportlab
 bcrypt
 email-validator
-
+pytest
+httpx
