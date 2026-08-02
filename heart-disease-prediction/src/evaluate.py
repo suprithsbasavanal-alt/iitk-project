@@ -245,3 +245,89 @@ def plot_model_comparison(
     plt.savefig(save_path, dpi=300)
     plt.close()
     return save_path
+
+
+def plot_baseline_vs_tuned_roc_auc(
+    baseline_vs_tuned_df: pd.DataFrame,
+    save_path: Path,
+) -> Path:
+    """
+    Generate and save a bar chart comparing Baseline vs Tuned ROC-AUC scores.
+
+    Args:
+        baseline_vs_tuned_df: DataFrame containing baseline and tuned ROC-AUC metrics.
+        save_path: Output file destination path.
+
+    Returns:
+        Path: Saved figure path.
+    """
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+
+    models = baseline_vs_tuned_df["Model"].tolist()
+    baseline_auc = baseline_vs_tuned_df["Baseline_Test_ROC_AUC"].tolist()
+    tuned_auc = baseline_vs_tuned_df["Tuned_Test_ROC_AUC"].tolist()
+
+    x = np.arange(len(models))
+    width = 0.35
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    rects1 = ax.bar(x - width/2, baseline_auc, width, label="Baseline Test ROC-AUC", color="#6baed6")
+    rects2 = ax.bar(x + width/2, tuned_auc, width, label="Tuned Test ROC-AUC", color="#2b5c8f")
+
+    ax.set_ylabel("ROC-AUC Score", fontsize=11)
+    ax.set_title("Baseline vs. Tuned Test ROC-AUC Comparison", fontsize=13, pad=15)
+    ax.set_xticks(x)
+    ax.set_xticklabels(models, rotation=15, ha="right", fontsize=10)
+    ax.set_ylim([0.0, 1.05])
+    ax.legend(loc="lower right", fontsize=10)
+    ax.grid(axis="y", linestyle=":", alpha=0.6)
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
+    plt.close()
+    return save_path
+
+
+def plot_baseline_vs_tuned_comparison(
+    baseline_vs_tuned_df: pd.DataFrame,
+    save_path: Path,
+) -> Path:
+    """
+    Generate and save a multi-metric bar chart comparing Baseline vs Tuned scores across models.
+
+    Args:
+        baseline_vs_tuned_df: DataFrame containing baseline and tuned metrics.
+        save_path: Output file destination path.
+
+    Returns:
+        Path: Saved figure path.
+    """
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+
+    models = baseline_vs_tuned_df["Model"].tolist()
+    baseline_f1 = baseline_vs_tuned_df["Baseline_Test_F1"].tolist()
+    tuned_f1 = baseline_vs_tuned_df["Tuned_Test_F1"].tolist()
+    baseline_recall = baseline_vs_tuned_df["Baseline_Test_Recall"].tolist()
+    tuned_recall = baseline_vs_tuned_df["Tuned_Test_Recall"].tolist()
+
+    x = np.arange(len(models))
+    width = 0.2
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.bar(x - 1.5*width, baseline_f1, width, label="Baseline F1", color="#9ecae1")
+    ax.bar(x - 0.5*width, tuned_f1, width, label="Tuned F1", color="#3182bd")
+    ax.bar(x + 0.5*width, baseline_recall, width, label="Baseline Recall", color="#fdae6b")
+    ax.bar(x + 1.5*width, tuned_recall, width, label="Tuned Recall", color="#e6550d")
+
+    ax.set_ylabel("Score", fontsize=11)
+    ax.set_title("Baseline vs. Tuned Models — F1 and Recall Comparison", fontsize=13, pad=15)
+    ax.set_xticks(x)
+    ax.set_xticklabels(models, rotation=15, ha="right", fontsize=10)
+    ax.set_ylim([0.0, 1.05])
+    ax.legend(loc="lower left", fontsize=10)
+    ax.grid(axis="y", linestyle=":", alpha=0.6)
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=300)
+    plt.close()
+    return save_path

@@ -15,7 +15,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import StratifiedKFold, cross_validate
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, StratifiedKFold, cross_validate
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
@@ -45,6 +45,141 @@ def get_baseline_models() -> Dict[str, Any]:
         "XGBoost": XGBClassifier(random_state=42, eval_metric="logloss"),
     }
     return models
+
+
+def get_tuning_search_spaces() -> Dict[str, Tuple[Any, Any, str]]:
+    """
+    Define hyperparameter search spaces and methods for 5 target models.
+
+    Returns:
+        Dict[str, Tuple[Any, Any, str]]: Map of model_name -> (classifier_instance, param_space, search_method)
+    """
+    spaces = {}
+
+    # 1. Logistic Regression (GridSearchCV)
+    log_reg_cls = LogisticRegression(random_state=42)
+    log_reg_param_grid = [
+        {
+            "classifier__penalty": ["l2"],
+            "classifier__C": [0.001, 0.01, 0.1, 1, 10, 100],
+            "classifier__solver": ["lbfgs"],
+            "classifier__max_iter": [5000],
+            "classifier__class_weight": [None, "balanced"],
+        },
+        {
+            "classifier__penalty": ["l1", "l2"],
+            "classifier__C": [0.001, 0.01, 0.1, 1, 10, 100],
+            "classifier__solver": ["liblinear"],
+            "classifier__class_weight": [None, "balanced"],
+        },
+    ]
+    spaces["Logistic Regression"] = (log_reg_cls, log_reg_param_grid, "grid")
+
+    # 2. Support Vector Machine (GridSearchCV)
+    svm_cls = SVC(probability=True, random_state=42)
+    svm_param_grid = [
+        {
+            "classifier__kernel": ["linear"],
+            "classifier__C": [0.01, 0.1, 1, 10, 100],
+            "classifier__class_weight": [None, "balanced"],
+        },
+        {
+            "classifier__kernel": ["rbf"],
+            "classifier__C": [0.01, 0.1, 1, 10, 100],
+            "classifier__gamma": ["scale", "auto", 0.001, 0.01, 0.1, 1],
+            "classifier__class_weight": [None, "balanced"],
+        },
+    ]
+    spaces["Support Vector Machine"] = (svm_cls, svm_param_grid, "grid")
+
+    # 3. Random Forest (RandomizedSearchCV)
+    rf_cls = RandomForestClassifier(random_state=42)
+    rf_param_dist = {
+        "classifier__n_estimators": [100, 200, 300, 500, 700],
+        "classifier__max_depth": [None, 3, 5, 7, 10, 15],
+        "classifier__min_samples_split": [2, 4, 6, 8, 10],
+        "classifier__min_samples_leaf": [1, 2, 3, 4, 5],
+        "classifier__max_features": ["sqrt", "log2", None],
+        "classifier__class_weight": [None, "balanced", "balanced_subsample"],
+    }
+    spaces["Random Forest"] = (rf_cls, rf_param_dist, "random")
+
+    # 4. XGBoost (RandomizedSearchCV)
+    xgb_cls = XGBClassifier(random_state=42, eval_metric="logloss")
+    xgb_param_dist = {
+        "classifier__n_estimators": [50, 100, 150, 200, 300, 500],
+        "classifier__max_depth": [2, 3, 4, 5, 6],
+        "classifier__learning_rate": [0.01, 0.03, 0.05, 0.1, 0.2],
+        "classifier__subsample": [0.6, 0.7, 0.8, 0.9, 1.0],
+        "classifier__colsample_bytree": [0.6, 0.7, 0.8, 0.9, 1.0],
+        "classifier__min_child_weight": [1, 3, 5, 7],
+        "classifier__reg_alpha": [0, 0.01, 0.1, 1],
+        "classifier__reg_lambda": [0.1, 1, 5, 10],
+    }
+    spaces["XGBoost"] = (xgb_cls, xgb_param_dist, "random")
+
+    # 5. K-Nearest Neighbors (GridSearchCV)
+    knn_cls = KNeighborsClassifier()
+    knn_param_grid = {
+        "classifier__n_neighbors": [3, 5, 7, 9, 11, 13, 15, 17, 19],
+        "classifier__weights": ["uniform", "distance"],
+        "classifier__metric": ["euclidean", "manhattan", "minkowski"],
+        "classifier__p": [1, 2],
+    }
+    spaces["K-Nearest Neighbors"] = (knn_cls, knn_param_grid, "grid")
+
+    return spaces
+
+
+def build_search_object(
+    model_name: str,
+    classifier: Any,
+    param_space: Any,
+    search_method: str = "grid",
+    n_iter: int = 60,
+    random_state: int = 42,
+) -> Union[GridSearchCV, RandomizedSearchCV]:
+    """
+    Construct a scikit-learn GridSearchCV or RandomizedSearchCV search object over the full pipeline.
+
+    Args:
+        model_name: Human-readable model name.
+        classifier: Base classifier instance.
+        param_space: Parameter grid or distribution map.
+        search_method: "grid" for GridSearchCV, "random" for RandomizedSearchCV.
+        n_iter: Iterations count for RandomizedSearchCV.
+        random_state: Random state seed.
+
+    Returns:
+        Union[GridSearchCV, RandomizedSearchCV]: Configured search object.
+    """
+    pipeline = build_baseline_pipeline(classifier)
+    cv_strategy = StratifiedKFold(n_splits=5, shuffle=True, random_state=random_state)
+
+    if search_method == "grid":
+        search = GridSearchCV(
+            estimator=pipeline,
+            param_grid=param_space,
+            scoring="roc_auc",
+            cv=cv_strategy,
+            refit=True,
+            n_jobs=-1,
+        )
+    elif search_method == "random":
+        search = RandomizedSearchCV(
+            estimator=pipeline,
+            param_distributions=param_space,
+            n_iter=n_iter,
+            scoring="roc_auc",
+            cv=cv_strategy,
+            refit=True,
+            random_state=random_state,
+            n_jobs=-1,
+        )
+    else:
+        raise ValueError(f"Unknown search_method: {search_method}")
+
+    return search
 
 
 def get_file_safe_name(model_name: str) -> str:

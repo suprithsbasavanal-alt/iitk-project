@@ -1,0 +1,111 @@
+Hyperparameter Tuning and Model Optimization Report (Part 6)
+===================================================================
+Project: Heart Disease Prediction
+Scope: Systematic Hyperparameter Search & Optimization (5 Target Models)
+
+1. Objective & Methodology
+--------------------------
+The primary goal of Part 6 is to tune promising baseline classification algorithms using 5-Fold Stratified Cross-Validation on the 242-row training set with ROC-AUC as the optimization metric.
+
+2. Test-Set Protection Strategy
+--------------------------------
+- Training Set: 242 rows (80%)
+- Test Set: 61 rows (20%) — Strictly LOCKED during hyperparameter search, parameter selection, and pre-test model ranking.
+- Configuration Freezing: Best parameters for all 5 models were written to 'frozen_tuned_configurations.json' BEFORE test set evaluation.
+
+3. Target Models Tuned (5)
+-------------------------
+1. Logistic Regression (GridSearchCV)
+2. Support Vector Machine (GridSearchCV)
+3. Random Forest (RandomizedSearchCV, n_iter=60)
+4. XGBoost (RandomizedSearchCV, n_iter=60)
+5. K-Nearest Neighbors (GridSearchCV)
+
+Un-tuned baseline models preserved for comparison: Decision Tree, Gaussian Naive Bayes.
+
+4. Search Complexity & Fits
+----------------------------
+                 Model      Search_Method  Candidate_Configurations  CV_Folds  Approximate_Fits_Performed  Best_CV_ROC_AUC
+   Logistic Regression       GridSearchCV                        36         5                         180         0.907032
+Support Vector Machine       GridSearchCV                        70         5                         350         0.904743
+         Random Forest RandomizedSearchCV                        60         5                         300         0.904086
+               XGBoost RandomizedSearchCV                        60         5                         300         0.906081
+   K-Nearest Neighbors       GridSearchCV                       108         5                         540         0.899634
+
+5. Pre-Test Model Ranking (Based ONLY on Training CV ROC-AUC)
+------------------------------------------------------------
+ Pre_Test_Rank                  Model  CV_ROC_AUC_Mean  CV_ROC_AUC_Std  CV_F1_Mean  CV_Recall_Mean  CV_Accuracy_Mean  CV_Precision_Mean
+             1    Logistic Regression         0.907032        0.011448    0.812256        0.783399          0.834694           0.853924
+             2                XGBoost         0.906081        0.023930    0.808210        0.773518          0.834609           0.863595
+             3 Support Vector Machine         0.904743        0.019462    0.796215        0.737549          0.830442           0.879975
+             4          Random Forest         0.904086        0.028241    0.803131        0.800791          0.822109           0.814505
+             5    K-Nearest Neighbors         0.899634        0.032436    0.802913        0.783004          0.826361           0.831774
+
+6. Tuned 5-Fold Cross-Validation Performance (Training Set)
+----------------------------------------------------------
+                 Model  CV_Accuracy_Mean  CV_Accuracy_Std  CV_Precision_Mean  CV_Precision_Std  CV_Recall_Mean  CV_Recall_Std  CV_F1_Mean  CV_F1_Std  CV_ROC_AUC_Mean  CV_ROC_AUC_Std
+   Logistic Regression          0.834694         0.013281           0.853924          0.059690        0.783399       0.067733    0.812256   0.017305         0.907032        0.011448
+Support Vector Machine          0.830442         0.035784           0.879975          0.059047        0.737549       0.098635    0.796215   0.053611         0.904743        0.019462
+         Random Forest          0.822109         0.022595           0.814505          0.044547        0.800791       0.085337    0.803131   0.034026         0.904086        0.028241
+               XGBoost          0.834609         0.029686           0.863595          0.069033        0.773518       0.100675    0.808210   0.042322         0.906081        0.023930
+   K-Nearest Neighbors          0.826361         0.021676           0.831774          0.029518        0.783004       0.084509    0.802913   0.037478         0.899634        0.032436
+
+7. Tuned Test Set Performance (61 Preserved Rows)
+-------------------------------------------------
+                 Model  Accuracy  Precision   Recall  Specificity       F1  ROC_AUC  TN  FP  FN  TP
+   Logistic Regression  0.868852   0.833333 0.892857     0.848485 0.862069 0.958874  28   5   3  25
+Support Vector Machine  0.836066   0.800000 0.857143     0.818182 0.827586 0.942641  27   6   4  24
+         Random Forest  0.901639   0.843750 0.964286     0.848485 0.900000 0.956710  28   5   1  27
+               XGBoost  0.868852   0.833333 0.892857     0.848485 0.862069 0.954545  28   5   3  25
+   K-Nearest Neighbors  0.885246   0.862069 0.892857     0.878788 0.877193 0.962121  29   4   3  25
+
+8. Baseline vs. Tuned Performance Comparison
+--------------------------------------------
+                 Model  Baseline_CV_ROC_AUC  Tuned_CV_ROC_AUC  Baseline_Test_ROC_AUC  Tuned_Test_ROC_AUC  Baseline_Test_F1  Tuned_Test_F1
+   Logistic Regression             0.902493          0.907032               0.966450            0.958874          0.881356       0.862069
+Support Vector Machine             0.888373          0.904743               0.964286            0.942641          0.881356       0.827586
+         Random Forest             0.896848          0.904086               0.943723            0.956710          0.866667       0.900000
+               XGBoost             0.859658          0.906081               0.933983            0.954545          0.838710       0.862069
+   K-Nearest Neighbors             0.871181          0.899634               0.952922            0.962121          0.877193       0.877193
+
+9. False-Negative Analysis (Class 1 = Heart Disease Present)
+-----------------------------------------------------------
+                 Model  Baseline_FN  Tuned_FN  FN_Change
+   Logistic Regression            2         3          1
+Support Vector Machine            2         4          2
+         Random Forest            2         1         -1
+               XGBoost            2         3          1
+   K-Nearest Neighbors            3         3          0
+Note: Lower FN count reduces the risk of missed heart disease diagnoses on this held-out evaluation split.
+
+10. Best Hyperparameter Configurations
+---------------------------------------
+
+[Logistic Regression] (GridSearchCV)
+Best CV ROC-AUC: 0.9070
+Parameters: {'C': 1, 'class_weight': None, 'penalty': 'l1', 'solver': 'liblinear'}
+
+[Support Vector Machine] (GridSearchCV)
+Best CV ROC-AUC: 0.9047
+Parameters: {'C': 0.1, 'class_weight': None, 'kernel': 'linear'}
+
+[Random Forest] (RandomizedSearchCV)
+Best CV ROC-AUC: 0.9041
+Parameters: {'n_estimators': 500, 'min_samples_split': 4, 'min_samples_leaf': 2, 'max_features': 'log2', 'max_depth': None, 'class_weight': 'balanced_subsample'}
+
+[XGBoost] (RandomizedSearchCV)
+Best CV ROC-AUC: 0.9061
+Parameters: {'subsample': 0.6, 'reg_lambda': 1, 'reg_alpha': 0.1, 'n_estimators': 100, 'min_child_weight': 7, 'max_depth': 5, 'learning_rate': 0.03, 'colsample_bytree': 0.7}
+
+[K-Nearest Neighbors] (GridSearchCV)
+Best CV ROC-AUC: 0.8996
+Parameters: {'metric': 'manhattan', 'n_neighbors': 11, 'p': 1, 'weights': 'distance'}
+
+11. Key Observations & Statistical Caution
+------------------------------------------
+- Dataset Size: 303 total instances (242 train, 61 test).
+- Due to small sample sizes in clinical capstone datasets, metrics represent empirical performance on this specific split. No claims of production readiness or clinical validation are made.
+
+12. Next Steps (Part 7)
+-----------------------
+In Part 7 (Final Model Selection & Comprehensive Comparison), the single best model will be selected based on clinical requirements (balancing ROC-AUC, Recall, and F1 stability) and evaluated for final deployment packaging.
