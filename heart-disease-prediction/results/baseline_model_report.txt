@@ -1,0 +1,86 @@
+Baseline Machine Learning Model Experiment Report (Part 5)
+===================================================================
+Project: Heart Disease Prediction
+Scope: Baseline Classifier Benchmarking (No Hyperparameter Tuning)
+
+1. Experiment Setup
+-------------------
+- Dataset: UCI Heart Disease Dataset (ID 45)
+- Training Set Size: 242 rows (80%)
+- Test Set Size: 61 rows (20%) — Strictly preserved untouched during CV & fitting
+- Binary Target: 'target' (0 = No Heart Disease [164 total], 1 = Heart Disease Present [139 total])
+- Cross-Validation: 5-Fold StratifiedKFold (shuffle=True, random_state=42) on X_train_raw
+- Modeling Architecture: End-to-End scikit-learn Pipelines (Preprocessor + Classifier)
+
+2. Models Evaluated (7)
+-----------------------
+1. Logistic Regression
+2. K-Nearest Neighbors
+3. Decision Tree
+4. Random Forest
+5. Support Vector Machine (probability=True)
+6. Gaussian Naive Bayes
+7. XGBoost (eval_metric='logloss')
+
+3. Stratified 5-Fold Cross-Validation Summary
+---------------------------------------------
+                 Model  CV_Accuracy_Mean  CV_Accuracy_Std  CV_Precision_Mean  CV_Precision_Std  CV_Recall_Mean  CV_Recall_Std  CV_F1_Mean  CV_F1_Std  CV_ROC_AUC_Mean  CV_ROC_AUC_Std
+   Logistic Regression          0.847109         0.009977           0.876753          0.054190        0.783399       0.045918    0.824501   0.006867         0.902493        0.014440
+   K-Nearest Neighbors          0.822194         0.028782           0.823226          0.031062        0.782609       0.089288    0.798926   0.042624         0.871181        0.038726
+         Decision Tree          0.698044         0.059586           0.678158          0.074769        0.684190       0.052129    0.676802   0.042038         0.696653        0.054275
+         Random Forest          0.818112         0.030707           0.817253          0.040538        0.782609       0.098108    0.794756   0.046911         0.896848        0.029440
+Support Vector Machine          0.813946         0.023502           0.830349          0.074249        0.764822       0.079740    0.789349   0.027053         0.888373        0.024024
+  Gaussian Naive Bayes          0.743793         0.028192           0.704943          0.113256        0.845850       0.136984    0.749469   0.021458         0.877289        0.021424
+               XGBoost          0.789456         0.022098           0.772316          0.041356        0.774704       0.064404    0.770663   0.026893         0.859658        0.023681
+
+4. Final Test Set Evaluation Results (61 Rows)
+---------------------------------------------
+                 Model  Accuracy  Precision   Recall  Specificity       F1  ROC_AUC  TN  FP  FN  TP
+   Logistic Regression  0.885246   0.838710 0.928571     0.848485 0.881356 0.966450  28   5   2  26
+   K-Nearest Neighbors  0.885246   0.862069 0.892857     0.878788 0.877193 0.952922  29   4   3  25
+         Decision Tree  0.737705   0.676471 0.821429     0.666667 0.741935 0.744048  22  11   5  23
+         Random Forest  0.868852   0.812500 0.928571     0.818182 0.866667 0.943723  27   6   2  26
+Support Vector Machine  0.885246   0.838710 0.928571     0.848485 0.881356 0.964286  28   5   2  26
+  Gaussian Naive Bayes  0.721311   0.641026 0.892857     0.575758 0.746269 0.826840  19  14   3  25
+               XGBoost  0.836066   0.764706 0.928571     0.757576 0.838710 0.933983  25   8   2  26
+
+5. Confusion Matrix Summary (Test Set)
+--------------------------------------
+- Logistic Regression: TN=28, FP=5, FN=2, TP=26
+- K-Nearest Neighbors: TN=29, FP=4, FN=3, TP=25
+- Decision Tree: TN=22, FP=11, FN=5, TP=23
+- Random Forest: TN=27, FP=6, FN=2, TP=26
+- Support Vector Machine: TN=28, FP=5, FN=2, TP=26
+- Gaussian Naive Bayes: TN=19, FP=14, FN=3, TP=25
+- XGBoost: TN=25, FP=8, FN=2, TP=26
+
+6. Best Baseline Models by Metric
+----------------------------------
+- Highest Test Accuracy:    Logistic Regression (0.8852)
+- Highest Test Precision:   K-Nearest Neighbors (0.8621)
+- Highest Test Recall:      Logistic Regression (0.9286)
+- Highest Test F1-Score:    Logistic Regression (0.8814)
+- Highest Test ROC-AUC:     Logistic Regression (0.9665)
+
+7. Cross-Validation vs Test Comparison
+--------------------------------------
+                 Model  CV_Accuracy_Mean  Test_Accuracy  CV_Recall_Mean  Test_Recall  CV_F1_Mean  Test_F1  CV_ROC_AUC_Mean  Test_ROC_AUC
+   Logistic Regression          0.847109       0.885246        0.783399     0.928571    0.824501 0.881356         0.902493      0.966450
+   K-Nearest Neighbors          0.822194       0.885246        0.782609     0.892857    0.798926 0.877193         0.871181      0.952922
+         Decision Tree          0.698044       0.737705        0.684190     0.821429    0.676802 0.741935         0.696653      0.744048
+         Random Forest          0.818112       0.868852        0.782609     0.928571    0.794756 0.866667         0.896848      0.943723
+Support Vector Machine          0.813946       0.885246        0.764822     0.928571    0.789349 0.881356         0.888373      0.964286
+  Gaussian Naive Bayes          0.743793       0.721311        0.845850     0.892857    0.749469 0.746269         0.877289      0.826840
+               XGBoost          0.789456       0.836066        0.774704     0.928571    0.770663 0.838710         0.859658      0.933983
+
+8. Medical Evaluation Context
+-----------------------------
+In clinical heart disease prediction, False Negatives (predicting No Disease when Disease is Present) represent missed diagnoses and carry high medical risk. Models exhibiting high Recall (Sensitivity) alongside balanced F1 and ROC-AUC scores provide strong candidates for hyperparameter tuning in Part 6.
+
+9. Next Steps
+-------------
+Promising baseline models will be advanced to Part 6 for systematic hyperparameter tuning using Stratified Cross-Validation.
+
+10. Disclaimer
+--------------
+This project is conducted strictly for educational and academic research purposes as part of a college capstone project.

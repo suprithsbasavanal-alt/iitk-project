@@ -15,117 +15,124 @@ The objective is to develop and compare machine-learning and later deep-learning
 - Extend the framework to include Deep Learning models in a subsequent phase.
 
 ## 4. Current Scope
-The current phase encompasses **Part 1 (Setup)**, **Part 2 (Dataset Integration)**, **Part 3 (Data Cleaning, Target Transformation, Train/Test Splitting, and Leakage-Safe Preprocessing Pipeline)**, and **Part 4 (Exploratory Data Analysis and Visualization)**.
+The current phase encompasses **Part 1 (Setup)**, **Part 2 (Dataset Integration)**, **Part 3 (Preprocessing Pipeline)**, **Part 4 (Exploratory Data Analysis)**, and **Part 5 (Baseline Machine Learning Model Training, Cross-Validation, Evaluation and Comparison)**.
 - The official UCI Heart Disease dataset (ID 45) is preserved as an immutable raw CSV (`data/raw/heart_disease_uci.csv`).
-- Target binary mapping (0 -> 0, 1-4 -> 1) and 80/20 stratified split have been established.
-- A scikit-learn `ColumnTransformer` preprocessing pipeline has been fitted **exclusively on the training split** to guarantee zero data leakage (`models/preprocessor.joblib`).
-- Comprehensive descriptive EDA has been executed: 21 report-quality visualizations (300 DPI) and 6 analytical CSV/TXT reports have been generated.
-- **No machine learning prediction model has been trained yet.**
+- Target binary mapping (0 -> 0, 1-4 -> 1) and 80/20 stratified split (242 train / 61 test) have been established.
+- 7 baseline classification algorithms have been benchmarked using 5-Fold Stratified Cross-Validation on the training set.
+- Complete end-to-end scikit-learn pipelines (`preprocessor` + `classifier`) have been fitted and persisted under `models/baseline/*.joblib`.
+- Evaluated on the untouched 61-row test set; confusion matrices, ROC curves, and performance comparison charts have been generated.
 
 ## 5. Planned Machine Learning Models
-For the Machine Learning phase, we plan to investigate and compare the following classification algorithms:
+For the Machine Learning phase, we investigate and compare the following classification algorithms:
 - Logistic Regression
 - K-Nearest Neighbors (KNN)
 - Decision Tree
 - Random Forest
 - Support Vector Machine (SVM)
-- Naive Bayes
+- Gaussian Naive Bayes
 - XGBoost
 
 ## 6. Planned Evaluation Metrics
-To comprehensively assess model performance, the following evaluation metrics will be used:
+To comprehensively assess model performance, the following evaluation metrics are used:
 - Accuracy
 - Precision
-- Recall
+- Recall (Sensitivity)
+- Specificity ($TN / [TN + FP]$)
 - F1-Score
 - ROC-AUC (Receiver Operating Characteristic - Area Under Curve)
-- Confusion Matrix
-
-*Note: Cross-validation strategies (e.g., Stratified K-Fold) and systematic hyperparameter tuning (e.g., Grid Search / Random Search) will be incorporated during model development. No performance accuracy metrics are reported yet as models have not been trained.*
+- Confusion Matrix (TN, FP, FN, TP)
 
 ## 7. Data Preprocessing & Leakage Prevention (Part 3)
-
-### Binary Target Transformation
-- **Raw Target (`num`)**: Multiclass integer values 0, 1, 2, 3, 4.
-- **Binary Target (`target`)**:
-  - `0` (Absence of Heart Disease): 164 instances (54.13%)
-  - `1` (Presence of Heart Disease): 139 instances (45.87%)
-
-### Feature Grouping
-- **Continuous Numerical Features (5)**: `age`, `trestbps`, `chol`, `thalach`, `oldpeak`
-- **Categorical / Discrete Features (8)**: `sex`, `cp`, `fbs`, `restecg`, `exang`, `slope`, `ca`, `thal`
-  * *Note on `ca`*: `ca` represents major vessels colored by fluoroscopy (0–3). Treated as discrete categorical.
-
-### Preprocessing Pipelines & Leakage Prevention Guarantee
-- **Numerical Pipeline**: `SimpleImputer(strategy="median")` ➔ `StandardScaler()`
-- **Categorical Pipeline**: `SimpleImputer(strategy="most_frequent")` ➔ `OneHotEncoder(handle_unknown="ignore")`
-- Imputer statistics, scaler parameters ($\mu, \sigma$), and one-hot encoder categories were **fitted strictly on `X_train`** (242 rows).
+- **Binary Target**: `target` (`0` = 164 No Heart Disease, `1` = 139 Heart Disease Present).
+- **Continuous Features (5)**: `age`, `trestbps`, `chol`, `thalach`, `oldpeak` ➔ `SimpleImputer(strategy="median")` ➔ `StandardScaler()`
+- **Categorical Features (8)**: `sex`, `cp`, `fbs`, `restecg`, `exang`, `slope`, `ca`, `thal` ➔ `SimpleImputer(strategy="most_frequent")` ➔ `OneHotEncoder(handle_unknown="ignore")`
+- **Leakage Prevention**: Imputer, scaler, and one-hot encoder parameters were **fitted strictly on training folds** within complete scikit-learn pipelines.
 
 ## 8. Exploratory Data Analysis & Visualization (Part 4)
+- **21 Report-Quality Figures**: Generated at 300 DPI in `results/figures/` (`01_target_distribution.png` to `21_missing_values.png`).
+- **6 Analytical Summary CSVs**: Saved in `results/` covering numerical statistics, grouped means by target, categorical disease prevalence, IQR outlier exploration, and Pearson correlation matrices.
 
-Descriptive analysis was performed directly on `data/raw/heart_disease_uci.csv` to evaluate clinical patterns without modifying raw values:
+## 9. Baseline Machine Learning Models (Part 5)
 
-- **Target Distribution**: Balanced class split of 164 negative (54.1%) vs 139 positive (45.9%) instances (`01_target_distribution.png`).
-- **Numerical Feature Insights**:
-  - *Age*: Higher mean in disease group (56.6 years) vs non-disease group (52.5 years) (`07_age_by_target.png`).
-  - *Max Heart Rate (`thalach`)*: Lower mean in disease group (139.3 bpm) vs non-disease group (158.4 bpm) (`10_thalach_by_target.png`).
-  - *ST Depression (`oldpeak`)*: Higher mean in disease group (1.57 mm) vs non-disease group (0.58 mm) (`11_oldpeak_by_target.png`).
-- **Categorical Disease Prevalence**:
-  - *Chest Pain Type (`cp`)*: Asymptomatic chest pain (code 4) shows 72.7% disease prevalence (`13_heart_disease_by_chest_pain.png`).
-  - *Exercise Angina (`exang`)*: Angina present (code 1) shows 69.4% disease prevalence (`16_heart_disease_by_exang.png`).
-  - *Thalassemia (`thal`)*: Reversible defect (code 7.0) shows 76.2% disease prevalence (`19_heart_disease_by_thal.png`).
-- **Outlier Analysis**: Identified potential IQR outliers (`chol` > 369 mg/dl, `oldpeak` > 4.0 mm) without removing valid physiological records (`results/eda_outlier_summary.csv`).
-- **Missing Values**: Verified missing entries in `ca` (4) and `thal` (2) (`21_missing_values.png`).
+### Modeling Architecture
+Each baseline model is constructed as an end-to-end scikit-learn `Pipeline`:
+```text
+Raw Patient Features ➔ ColumnTransformer Preprocessor ➔ Classifier
+```
+This guarantees zero data leakage during cross-validation.
 
-## 9. Project Structure
+### Cross-Validation & Test Benchmarking
+- **Cross-Validation**: 5-Fold Stratified Cross-Validation (`StratifiedKFold(n_splits=5, shuffle=True, random_state=42)`) executed strictly on the 242-row training set (`X_train_raw.csv`).
+- **Test Evaluation**: Final models were fitted on all 242 training rows and evaluated on the untouched 61-row test set (`X_test_raw.csv`).
+- **Persisted Pipeline Artifacts**: Saved complete fitted pipelines in `models/baseline/` (`logistic_regression.joblib`, `knn.joblib`, `decision_tree.joblib`, `random_forest.joblib`, `svm.joblib`, `gaussian_naive_bayes.joblib`, `xgboost.joblib`).
+- **Generated Metrics & Figures**:
+  - `results/metrics/baseline_cv_results.csv` (Mean ± Std metrics across CV folds)
+  - `results/metrics/baseline_test_results.csv` (Test Accuracy, Precision, Recall, Specificity, F1, ROC-AUC, TN, FP, FN, TP)
+  - `results/metrics/cv_vs_test_comparison.csv` (CV vs Test comparison)
+  - `results/figures/models/baseline_roc_curves.png` (Combined ROC curves for all 7 models)
+  - `results/figures/models/baseline_model_comparison.png` (Bar chart model comparison)
+
+*For detailed numerical performance tables, inspect [baseline_test_results.csv](file:///Users/suprith.s.basavanal/Documents/antigrativity%20/iitk-project/heart-disease-prediction/results/metrics/baseline_test_results.csv) and [baseline_model_report.txt](file:///Users/suprith.s.basavanal/Documents/antigrativity%20/iitk-project/heart-disease-prediction/results/baseline_model_report.txt).*
+
+## 10. Project Structure
 ```text
 heart-disease-prediction/
 │
 ├── data/
 │   ├── raw/                        # Immutable raw dataset (heart_disease_uci.csv)
-│   └── processed/                  # Split CSV datasets (X_train_raw, X_test_raw, y_train, y_test, preprocessed)
+│   └── processed/                  # Split CSV datasets (X_train_raw, X_test_raw, y_train, y_test)
 │
 ├── notebooks/
-│   └── 01_eda.ipynb                # Human-readable EDA notebook with 14 sections & plots
+│   ├── 01_eda.ipynb                # Executed EDA notebook with 14 sections & plots
+│   └── 02_baseline_models.ipynb    # Executed Baseline Models notebook with CV & test results
 │
 ├── src/
 │   ├── __init__.py                 # Package initializer
 │   ├── download_data.py            # Automated dataset acquisition script from UCI
 │   ├── data_loader.py              # Data loading & validation utilities
 │   ├── preprocessing.py            # Target conversion, split & ColumnTransformer pipeline
-│   ├── eda.py                      # Reusable EDA module & 21-figure Matplotlib generator
-│   ├── train.py                    # Model training & persistence logic skeleton
-│   ├── evaluate.py                 # Performance evaluation & metric reporting skeleton
+│   ├── eda.py                      # Reusable EDA engine & 21-figure Matplotlib generator
+│   ├── train.py                    # Central baseline model registry & 5-fold CV engine
+│   ├── evaluate.py                 # Performance metrics, classification reports & ROC plots
 │   └── predict.py                  # Inference routines for trained models
 │
 ├── scripts/
 │   ├── verify_dataset.py           # Dataset verification script
 │   ├── verify_preprocessing.py     # 14-point preprocessing & leakage verification script
-│   ├── generate_eda.py             # Script reproducing all 21 figures & 6 summary reports
-│   └── verify_eda.py               # 14-point EDA verification script
+│   ├── generate_eda.py             # Script reproducing all 21 EDA figures & 6 summary reports
+│   ├── verify_eda.py               # 14-point EDA verification script
+│   ├── train_baseline_models.py    # Master execution script training 7 baseline pipelines
+│   └── verify_baseline_models.py   # 25-point baseline model verification suite
 │
 ├── models/
 │   ├── .gitkeep
-│   └── preprocessor.joblib         # Fitted scikit-learn preprocessing transformer
+│   ├── preprocessor.joblib         # Fitted preprocessor transformer
+│   └── baseline/                   # 7 Persisted complete baseline pipeline joblib files
 │
 ├── results/
-│   ├── dataset_metadata.txt        # UCI dataset metadata documentation
-│   ├── dataset_dictionary.csv      # Detailed feature data dictionary
-│   ├── data_quality_report.txt     # Data quality inspection report
-│   ├── preprocessing_report.txt    # Detailed preprocessing & leakage audit report
-│   ├── processed_feature_names.txt # List of 28 transformed feature names
-│   ├── eda_numerical_summary.csv   # Numerical feature summary statistics
-│   ├── eda_numerical_by_target.csv # Grouped numerical means and medians by target
-│   ├── eda_categorical_summary.csv # Categorical counts and disease prevalence
-│   ├── eda_correlation_matrix.csv  # Pearson correlation matrix
-│   ├── eda_outlier_summary.csv     # IQR outlier analysis summary
-│   ├── eda_prevalence_summary.csv  # Disease prevalence summary across categories
-│   ├── eda_report.txt              # Comprehensive automated EDA text report
-│   ├── figures/                    # 21 report-quality Matplotlib figures (01_*.png to 21_*.png)
-│   └── metrics/                    # Evaluation metrics reports directory
+│   ├── dataset_metadata.txt
+│   ├── dataset_dictionary.csv
+│   ├── data_quality_report.txt
+│   ├── preprocessing_report.txt
+│   ├── processed_feature_names.txt
+│   ├── eda_*.csv                   # Summary CSV files from EDA phase
+│   ├── eda_report.txt
+│   ├── baseline_model_report.txt   # Comprehensive baseline experiment report
+│   ├── figures/
+│   │   ├── 01_*.png to 21_*.png    # 21 EDA figures
+│   │   └── models/                 # 7 Confusion matrices, combined ROC, comparison plot
+│   └── metrics/
+│       ├── baseline_cv_results.csv # 5-Fold CV mean ± std metrics
+│       ├── baseline_cv_fold_results.csv # 35 fold-level CV results
+│       ├── baseline_test_results.csv    # Test set performance metrics
+│       ├── cv_vs_test_comparison.csv    # CV vs Test comparison table
+│       ├── baseline_test_predictions.csv# Row-level test predictions and probabilities
+│       └── classification_reports/      # 7 Text classification reports
 │
 ├── tests/
-│   └── test_preprocessing.py       # Unit test suite for Part 3 preprocessing
+│   ├── test_preprocessing.py       # Unit test suite for Part 3
+│   ├── test_train.py               # Unit test suite for Part 5 train module
+│   └── test_evaluate.py            # Unit test suite for Part 5 evaluate module
 │
 ├── main.py                         # Application entry point script
 ├── requirements.txt                # Project dependencies
@@ -133,7 +140,7 @@ heart-disease-prediction/
 └── README.md                       # Project documentation
 ```
 
-## 10. Installation
+## 11. Installation
 
 ### Prerequisites
 - Python 3.8+ installed on your system.
@@ -175,49 +182,59 @@ heart-disease-prediction/
    pip install -r requirements.txt
    ```
 
-## 11. Running the Project
+## 12. Running the Project
 
-### Reproduce EDA & Run Verifications
+### Reproduce Baseline Training & Run Verifications
 
-1. Regenerate all 21 EDA figures, CSV summaries, and text report:
+1. Train 7 baseline models, run 5-fold CV, evaluate test set, and generate figures/reports:
+   ```bash
+   python scripts/train_baseline_models.py
+   ```
+
+2. Run 25-point baseline model verification suite:
+   ```bash
+   python scripts/verify_baseline_models.py
+   ```
+
+3. Regenerate all 21 EDA figures and summary reports:
    ```bash
    python scripts/generate_eda.py
    ```
 
-2. Run 14-point EDA verification suite:
+4. Run 14-point EDA verification suite:
    ```bash
    python scripts/verify_eda.py
    ```
 
-3. Execute leakage-safe preprocessing pipeline:
+5. Execute leakage-safe preprocessing pipeline:
    ```bash
    python src/preprocessing.py
    ```
 
-4. Run 14-point preprocessing verification suite:
+6. Run 14-point preprocessing verification suite:
    ```bash
    python scripts/verify_preprocessing.py
    ```
 
-5. Run unit test suite:
+7. Run unit test suite:
    ```bash
    python -m unittest discover tests
    ```
 
-6. Run main project entry point:
+8. Run main project entry point:
    ```bash
    python main.py
    ```
 
-## 12. Dataset
+## 13. Dataset
 This project uses the official **Heart Disease Dataset** from the **UCI Machine Learning Repository** (Dataset ID: 45).
 - **Official URL**: [https://archive.ics.uci.edu/dataset/45/heart+disease](https://archive.ics.uci.edu/dataset/45/heart+disease)
 - **Instances**: 303 patient records
 - **Features**: 13 clinical attributes
 - **Target**: `num` (0 to 4) converted to binary classification target `target` (`0` = 164, `1` = 139).
 
-## 13. Future Deep Learning Module
+## 14. Future Deep Learning Module
 After the machine learning module is fully built, benchmarked, and tuned, the project will expand to include a **Deep Learning Module**.
 
-## 14. Disclaimer
+## 15. Disclaimer
 This project is conducted strictly for educational and academic research purposes as part of a college capstone project. The predictions generated by models built within this repository are not medical diagnoses.
