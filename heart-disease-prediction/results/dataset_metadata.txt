@@ -1,0 +1,50 @@
+UCI Heart Disease Dataset Metadata Summary
+==========================================
+
+Dataset Name: Heart Disease Dataset
+Dataset ID: 45
+Official URL: https://archive.ics.uci.edu/dataset/45/heart+disease
+Repository: UCI Machine Learning Repository
+DOI: 10.24432/C52P4X
+
+Creators:
+- Andras Janosi (Gottsegen Hungarian Institute of Cardiology, Budapest)
+- William Steinbrunn (University Hospital, Zurich, Switzerland)
+- Matthias Pfisterer (University Hospital, Basel, Switzerland)
+- Robert Detrano (V.A. Medical Center, Long Beach and UCI)
+
+Dataset Overview:
+- Number of Instances: 303
+- Number of Features: 13
+- Number of Target Variables: 1 (num)
+- Total Columns: 14
+- Associated Tasks: Classification
+- Feature Types: Categorical, Integer, Real (float)
+
+Features List:
+1. age (Integer) - Age in years
+2. sex (Categorical) - Sex (1 = male, 0 = female)
+3. cp (Categorical) - Chest pain type (1 = typical angina, 2 = atypical angina, 3 = non-anginal pain, 4 = asymptomatic)
+4. trestbps (Integer) - Resting blood pressure (in mm Hg on admission to hospital)
+5. chol (Integer) - Serum cholesterol in mg/dl
+6. fbs (Categorical) - Fasting blood sugar > 120 mg/dl (1 = true, 0 = false)
+7. restecg (Categorical) - Resting electrocardiographic results (0 = normal, 1 = ST-T wave abnormality, 2 = left ventricular hypertrophy)
+8. thalach (Integer) - Maximum heart rate achieved
+9. exang (Categorical) - Exercise induced angina (1 = yes, 0 = no)
+10. oldpeak (Real/Float) - ST depression induced by exercise relative to rest
+11. slope (Categorical) - Slope of peak exercise ST segment (1 = upsloping, 2 = flat, 3 = downsloping)
+12. ca (Float/Integer) - Number of major vessels (0-3) colored by fluoroscopy
+13. thal (Categorical) - Thalassemia status (3.0 = normal, 6.0 = fixed defect, 7.0 = reversible defect)
+
+Target Variable:
+- num (Integer) - Diagnosis of heart disease (angiographic disease status)
+  * 0: < 50% diameter narrowing (absence of disease, 164 instances)
+  * 1: > 50% diameter narrowing (severity level 1, 55 instances)
+  * 2: > 50% diameter narrowing (severity level 2, 36 instances)
+  * 3: > 50% diameter narrowing (severity level 3, 35 instances)
+  * 4: > 50% diameter narrowing (severity level 4, 13 instances)
+
+Missing Values Information:
+- ca: 4 missing values (NaN)
+- thal: 2 missing values (NaN)
+- Total missing entries: 6 across 303 rows

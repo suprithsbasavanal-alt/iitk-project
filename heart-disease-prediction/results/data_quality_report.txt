@@ -1,0 +1,68 @@
+Data Quality Assessment Report
+============================
+Project: Heart Disease Prediction
+Dataset: UCI Heart Disease Dataset (Cleveland Subset, ID: 45)
+
+1. Dataset Shape
+----------------
+- Total Rows (Instances): 303
+- Total Columns (Variables): 14 (13 Features + 1 Target)
+
+2. Column Information & Data Types
+-----------------------------------
+Column Name    Data Type    Role        Description
+-----------    ---------    ----        -----------
+age            int64        Feature     Age in years
+sex            int64        Feature     Sex (1 = male, 0 = female)
+cp             int64        Feature     Chest pain type (1, 2, 3, 4)
+trestbps       int64        Feature     Resting blood pressure (mm Hg)
+chol           int64        Feature     Serum cholesterol (mg/dl)
+fbs            int64        Feature     Fasting blood sugar > 120 mg/dl (1, 0)
+restecg        int64        Feature     Resting ECG results (0, 1, 2)
+thalach        int64        Feature     Max heart rate achieved
+exang          int64        Feature     Exercise induced angina (1, 0)
+oldpeak        float64      Feature     ST depression induced by exercise
+slope          int64        Feature     Slope of peak exercise ST segment (1, 2, 3)
+ca             float64      Feature     Major vessels colored by fluoroscopy (0-3)
+thal           float64      Feature     Thalassemia (3.0, 6.0, 7.0)
+num            int64        Target      Diagnosis of heart disease (0 to 4)
+
+3. Missing Values
+-----------------
+Column Name    Missing Count    Missing Percentage
+-----------    -------------    ------------------
+ca             4                1.32%
+thal           2                0.66%
+All others     0                0.00%
+--------------------------------------------------
+Total Missing: 6 missing entries across 2 columns (6 out of 4,242 total cells = 0.14%).
+
+4. Duplicate Count
+------------------
+- Duplicate Rows: 0 (No duplicate patient records detected).
+
+5. Target Distribution (raw 'num' column)
+-----------------------------------------
+Value    Count    Percentage    Interpretation
+-----    -----    ----------    --------------
+0        164      54.13%        No Heart Disease (Absence)
+1        55       18.15%        Heart Disease Severity 1
+2        36       11.88%        Heart Disease Severity 2
+3        35       11.55%        Heart Disease Severity 3
+4        13       4.29%         Heart Disease Severity 4
+--------------------------------------------------------------
+Total:   303      100.00%       (164 Absence vs 139 Presence)
+
+6. Potential Data Quality Issues Identified
+-------------------------------------------
+1. Missing Values in Features:
+   - Feature 'ca' has 4 missing values (NaN).
+   - Feature 'thal' has 2 missing values (NaN).
+   - Note: In future preprocessing, appropriate imputation strategies (e.g. median/mode imputation) should be applied.
+
+2. Multiclass Target Scaling to Binary:
+   - Target variable 'num' contains integer values from 0 to 4.
+   - For binary classification, original values 1, 2, 3, and 4 represent heart disease presence (>50% narrowing) and will later be mapped to binary 1, while 0 remains 0.
+
+3. Mixed Numeric & Categorical Representation:
+   - Categorical features (sex, cp, fbs, restecg, exang, slope, thal) are currently encoded as numeric integers/floats in raw format and will require appropriate handling (e.g., One-Hot Encoding) in the preprocessing pipeline.
