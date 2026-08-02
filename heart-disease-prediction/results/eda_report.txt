@@ -1,0 +1,113 @@
+UCI Heart Disease Dataset — Exploratory Data Analysis (EDA) Report
+========================================================================
+Project: Heart Disease Prediction
+Dataset ID: 45 (Cleveland Subset)
+
+1. Dataset Overview & Binary Target Structure
+----------------------------------------------
+- Total Records: 303 patient observations
+- Total Predictor Features: 13 clinical attributes
+- Binary Target ('target'):
+  * Class 0 (No Heart Disease): 164 instances (54.13%)
+  * Class 1 (Heart Disease Present): 139 instances (45.87%)
+- Class Balance Note: The dataset exhibits a balanced distribution (54.1% vs 45.9%).
+
+2. Data Quality & Missing Value Inspection
+------------------------------------------
+- Total Duplicate Rows: 0
+- Missing Values Detected:
+  * 'ca' (major vessels colored by fluoroscopy): 4 missing entries (1.32%)
+  * 'thal' (thalassemia status): 2 missing entries (0.66%)
+  * Total Missing Cells: 6 out of 4,242 dataset cells (0.14%)
+
+3. Numerical Feature Summaries (Overall vs Target Groups)
+---------------------------------------------------------
+Feature Summary (Overall):
+ feature  count       mean       std   min  q1_25%  median_50%  q3_75%   max
+     age    303  54.438944  9.038662  29.0    48.0        56.0    61.0  77.0
+trestbps    303 131.689769 17.599748  94.0   120.0       130.0   140.0 200.0
+    chol    303 246.693069 51.776918 126.0   211.0       241.0   275.0 564.0
+ thalach    303 149.607261 22.875003  71.0   133.5       153.0   166.0 202.0
+ oldpeak    303   1.039604  1.161075   0.0     0.0         0.8     1.6   6.2
+
+Grouped Summaries (No Heart Disease vs Heart Disease Present):
+ feature  no_disease_mean  no_disease_median  disease_mean  disease_median  overall_mean  overall_median
+     age        52.585366               52.0     56.625899            58.0     54.438944            56.0
+trestbps       129.250000              130.0    134.568345           130.0    131.689769           130.0
+    chol       242.640244              234.5    251.474820           249.0    246.693069           241.0
+ thalach       158.378049              161.0    139.258993           142.0    149.607261           153.0
+ oldpeak         0.586585                0.2      1.574101             1.4      1.039604             0.8
+
+Descriptive Numerical Patterns Observed:
+- Age: Patients with heart disease in this dataset had a higher mean age (56.6 years) compared to patients without heart disease (52.6 years).
+- Max Heart Rate (thalach): Patients with heart disease had a lower mean max heart rate (139.3 bpm) than non-disease patients (158.4 bpm).
+- ST Depression (oldpeak): Mean exercise-induced ST depression was higher in the disease group (1.57 mm) than in the non-disease group (0.59 mm).
+
+4. Categorical Feature Prevalence Summaries
+-------------------------------------------
+feature category_code     category_name  total_count  no_disease_count  disease_count  disease_percentage
+    sex             0            Female           97                72             25               25.77
+    sex             1              Male          206                92            114               55.34
+     cp             1    Typical Angina           23                16              7               30.43
+     cp             2   Atypical Angina           50                41              9               18.00
+     cp             3  Non-anginal Pain           86                68             18               20.93
+     cp             4      Asymptomatic          144                39            105               72.92
+    fbs             0  FBS <= 120 mg/dl          258               141            117               45.35
+    fbs             1   FBS > 120 mg/dl           45                23             22               48.89
+restecg             0            Normal          151                95             56               37.09
+restecg             1  ST-T Abnormality            4                 1              3               75.00
+restecg             2    LV Hypertrophy          148                68             80               54.05
+  exang             0                No          204               141             63               30.88
+  exang             1               Yes           99                23             76               76.77
+  slope             1         Upsloping          142               106             36               25.35
+  slope             2              Flat          140                49             91               65.00
+  slope             3       Downsloping           21                 9             12               57.14
+     ca           0.0         0 Vessels          176               130             46               26.14
+     ca           1.0          1 Vessel           65                21             44               67.69
+     ca           2.0         2 Vessels           38                 7             31               81.58
+     ca           3.0         3 Vessels           20                 3             17               85.00
+     ca Missing (NaN)     Missing Value            4                 3              1               25.00
+   thal           3.0            Normal          166               129             37               22.29
+   thal           6.0      Fixed Defect           18                 6             12               66.67
+   thal           7.0 Reversible Defect          117                28             89               76.07
+   thal Missing (NaN)     Missing Value            2                 1              1               50.00
+
+Key Categorical Patterns Observed:
+- Sex: Male patients in this dataset showed a higher disease prevalence (55.34%) than female patients (25.77%).
+- Chest Pain Type (cp): Asymptomatic chest pain (code 4) was associated with the highest disease prevalence (72.92%).
+- Exercise Angina (exang): Patients with exercise-induced angina exhibited a higher disease prevalence (76.77%) compared to those without (30.88%).
+- Vessel Count (ca): Patients with 1 to 3 major vessels colored by fluoroscopy showed markedly elevated disease prevalence (>67%).
+- Thalassemia (thal): Reversible defect (code 7.0) showed a high disease prevalence (76.07%).
+
+5. Potential Outlier Exploration (IQR Rule)
+--------------------------------------------
+ feature    q1    q3  iqr  lower_bound  upper_bound  outlier_count  outlier_percentage
+     age  48.0  61.0 13.0        28.50        80.50              0                0.00
+trestbps 120.0 140.0 20.0        90.00       170.00              9                2.97
+    chol 211.0 275.0 64.0       115.00       371.00              5                1.65
+ thalach 133.5 166.0 32.5        84.75       214.75              1                0.33
+ oldpeak   0.0   1.6  1.6        -2.40         4.00              5                1.65
+
+Note on Outliers: Clinical measurements exceeding 1.5 * IQR (e.g. cholesterol > 369 mg/dl or oldpeak > 4.0 mm) represent valid physiological extremes and will not be blindly removed.
+
+6. Pearson Correlation Matrix (Continuous Features & Target)
+------------------------------------------------------------
+               age  trestbps      chol   thalach   oldpeak    target
+age       1.000000  0.284946  0.208950 -0.393806  0.203805  0.223120
+trestbps  0.284946  1.000000  0.130120 -0.045351  0.189171  0.150825
+chol      0.208950  0.130120  1.000000 -0.003432  0.046564  0.085164
+thalach  -0.393806 -0.045351 -0.003432  1.000000 -0.343085 -0.417167
+oldpeak   0.203805  0.189171  0.046564 -0.343085  1.000000  0.424510
+target    0.223120  0.150825  0.085164 -0.417167  0.424510  1.000000
+
+Correlation Observations:
+- Max Heart Rate ('thalach') shows a moderate negative correlation with target (r = -0.42).
+- ST Depression ('oldpeak') shows a moderate positive correlation with target (r = 0.42).
+- Age shows a weak-to-moderate positive correlation with target (r = 0.22).
+
+7. Important Limitations of the EDA
+-----------------------------------
+- All observations are purely descriptive associations within the 303 patient sample of the Cleveland subset.
+- Correlation and descriptive prevalence differences DO NOT imply medical causation.
+- No feature selection or model parameter tuning was performed based on these descriptive findings.
+- ALL PREPROCESSING AND MODEL PARAMETERS MUST REMAIN STRICTLY FITTED ON THE TRAINING SPLIT FROM PART 3.
