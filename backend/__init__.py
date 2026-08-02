@@ -1,1 +1,0 @@
-# HeartCare AI Backend Package

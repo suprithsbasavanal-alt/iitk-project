@@ -1,1 +1,0 @@
-# HeartCare AI App Module
