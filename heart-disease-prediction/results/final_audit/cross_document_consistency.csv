@@ -1,0 +1,18 @@
+Item,Actual Source of Truth,Report,PPT,README,Viva,Streamlit,Status
+Dataset Observations,303 rows,303 rows,303 rows,303 rows,303 rows,303 rows,MATCH
+Train / Test Split,242 / 61 rows (80/20),242 / 61 rows (80/20),242 / 61 rows (80/20),242 / 61 rows (80/20),242 / 61 rows (80/20),242 / 61 rows (80/20),MATCH
+Transformed Features,28 features,28 features,28 features,28 features,28 features,28 features,MATCH
+Random Forest Accuracy,0.9016 (90.16%),90.16%,90.16%,90.16%,90.16%,90.16%,MATCH
+Random Forest Precision,0.8438 (84.38%),0.8438,84.38%,0.8438,0.8438,0.8438,MATCH
+Random Forest Recall,0.9643 (96.43%),96.43%,96.43%,96.43%,96.43%,96.43%,MATCH
+Random Forest Specificity,0.8485 (84.85%),0.8485,84.85%,0.8485,0.8485,0.8485,MATCH
+Random Forest F1,0.9000 (90.00%),0.9000,90.00%,0.9000,0.9000,0.9000,MATCH
+Random Forest ROC-AUC,0.9567,0.9567,0.9567,0.9567,0.9567,0.9567,MATCH
+ANN Accuracy,0.8525 (85.25%),85.25%,85.25%,85.25%,85.25%,85.25%,MATCH
+ANN Recall,0.9643 (96.43%),96.43%,96.43%,96.43%,96.43%,96.43%,MATCH
+ANN ROC-AUC,0.9253,0.9253,0.9253,0.9253,0.9253,0.9253,MATCH
+Confusion Matrix RF,"TN=28, FP=5, FN=1, TP=27","TN=28, FP=5, FN=1, TP=27","TN=28, FP=5, FN=1, TP=27","TN=28, FP=5, FN=1, TP=27","TN=28, FP=5, FN=1, TP=27","TN=28, FP=5, FN=1, TP=27",MATCH
+Confusion Matrix ANN,"TN=25, FP=8, FN=1, TP=27","TN=25, FP=8, FN=1, TP=27","TN=25, FP=8, FN=1, TP=27","TN=25, FP=8, FN=1, TP=27","TN=25, FP=8, FN=1, TP=27","TN=25, FP=8, FN=1, TP=27",MATCH
+Hyperparameters RF,"n_est=500, max_feat='log2', min_split=4, min_leaf=2","n_est=500, max_feat='log2', min_split=4, min_leaf=2","n_est=500, max_feat='log2', min_split=4, min_leaf=2","n_est=500, max_feat='log2', min_split=4, min_leaf=2","n_est=500, max_feat='log2', min_split=4, min_leaf=2","n_est=500, max_feat='log2', min_split=4, min_leaf=2",MATCH
+Literature Paper Count,"16 papers (8 ML, 8 DL)","16 papers (8 ML, 8 DL)","16 papers (8 ML, 8 DL)","16 papers (8 ML, 8 DL)","16 papers (8 ML, 8 DL)","16 papers (8 ML, 8 DL)",MATCH
+Team Allocation,4 per member (2 ML + 2 DL),4 per member (2 ML + 2 DL),4 per member (2 ML + 2 DL),4 per member (2 ML + 2 DL),4 per member (2 ML + 2 DL),N/A,MATCH
