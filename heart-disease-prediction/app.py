@@ -207,10 +207,10 @@ def main():
         st.error(f"Error loading ML model artifact: {e}. Please ensure `models/final/final_model.joblib` exists.")
         return
 
-    # Sample Record Loader & Reset Controls
+    # Sample Record Loader & Reset Controls (Optimized Column Ratios for Responsive UI)
     sample_df = get_sample_test_records()
     
-    col_demo1, col_demo2 = st.columns([3, 1])
+    col_demo1, col_demo2 = st.columns([3.5, 1.5], gap="large")
     
     with col_demo1:
         if not sample_df.empty:
@@ -224,7 +224,7 @@ def main():
             )
 
     with col_demo2:
-        st.write("") # Spacer
+        st.write("") # Vertical alignment spacer
         st.write("")
         st.button("🔄 Reset Inputs", on_click=reset_all_inputs, use_container_width=True)
 
@@ -250,7 +250,7 @@ def main():
 
         # --- Section 1: Patient Information ---
         st.markdown("#### 1. Patient Demographic Information")
-        c1, c2 = st.columns(2)
+        c1, c2 = st.columns(2, gap="medium")
         with c1:
             age = st.number_input(
                 "Age (years)",
@@ -273,7 +273,7 @@ def main():
 
         # --- Section 2: Clinical Measurements ---
         st.markdown("#### 2. Physiological & Hemodynamic Measurements")
-        c3, c4 = st.columns(2)
+        c3, c4 = st.columns(2, gap="medium")
         with c3:
             trestbps = st.number_input(
                 "Resting Blood Pressure (mm Hg)",
@@ -310,7 +310,7 @@ def main():
 
         # --- Section 3: Heart & ECG Characteristics ---
         st.markdown("#### 3. Cardiac & Electrocardiographic Characteristics")
-        c5, c6 = st.columns(2)
+        c5, c6 = st.columns(2, gap="medium")
         
         with c5:
             cp_options = {
@@ -394,7 +394,7 @@ def main():
                 help="Thalassemia nuclear blood disorder status"
             )
 
-        submit_btn = st.form_submit_button("🩺 Predict Heart Disease Risk", type="primary")
+        submit_btn = st.form_submit_button("🩺 Predict Heart Disease Risk", type="primary", use_container_width=True)
 
     # Execution of Model Prediction Routine
     if submit_btn:
@@ -439,14 +439,14 @@ def main():
 
             st.markdown(f"### Model Output & Risk Estimation (`{engine_name}`)")
             
-            res_col1, res_col2, res_col3 = st.columns([2, 1, 1])
+            res_col1, res_col2, res_col3 = st.columns([3, 1, 1], gap="medium")
 
             with res_col1:
                 if pred_class == 1:
-                    st.error("### Model Prediction: Heart Disease Present")
+                    st.error("#### Model Prediction: Heart Disease Present")
                     st.write(f"**Assessment**: The `{engine_name}` pipeline estimates elevated likelihood of cardiovascular disease presence.")
                 else:
-                    st.success("### Model Prediction: No Heart Disease")
+                    st.success("#### Model Prediction: No Heart Disease")
                     st.write(f"**Assessment**: The `{engine_name}` pipeline estimates low likelihood of cardiovascular disease presence.")
 
             with res_col2:
