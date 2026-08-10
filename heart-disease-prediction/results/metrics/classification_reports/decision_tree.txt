@@ -1,0 +1,11 @@
+Classification Report — Decision Tree
+==================================================
+
+                                precision    recall  f1-score   support
+
+     Class 0: No Heart Disease     0.8148    0.6667    0.7333        33
+Class 1: Heart Disease Present     0.6765    0.8214    0.7419        28
+
+                      accuracy                         0.7377        61
+                     macro avg     0.7456    0.7440    0.7376        61
+                  weighted avg     0.7513    0.7377    0.7373        61

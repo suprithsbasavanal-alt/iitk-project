@@ -38,28 +38,16 @@ env/
 .DS_Store
 Thumbs.db
 
-# Data files (ignore raw and processed contents, preserve directory structure)
-data/raw/*
-!data/raw/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
-
-# Trained Model Artifacts
-models/*
-!models/.gitkeep
-*.joblib
-*.pkl
-*.h5
-*.onnx
-
-# Evaluation Results & Outputs
-results/figures/*
-!results/figures/.gitkeep
-results/metrics/*
-!results/metrics/.gitkeep
-
-# IDE / Editor configuration files
-.vscode/
-.idea/
-*.swp
-*.swo
+# Track all required project datasets, models, metrics, figures, and reports for deployment
+!data/raw/heart_disease_uci.csv
+!data/processed/*.csv
+!models/preprocessor.joblib
+!models/final/*
+!models/deep_learning/*
+!models/baseline/*.joblib
+!models/tuned/*.joblib
+!results/metrics/*.csv
+!results/metrics/deep_learning/*
+!results/figures/*.png
+!results/figures/deep_learning/*.png
+!results/figures/app_screenshots/*.png

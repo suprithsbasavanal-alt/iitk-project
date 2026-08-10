@@ -1,0 +1,11 @@
+Classification Report — Random Forest
+==================================================
+
+                                precision    recall  f1-score   support
+
+     Class 0: No Heart Disease     0.9310    0.8182    0.8710        33
+Class 1: Heart Disease Present     0.8125    0.9286    0.8667        28
+
+                      accuracy                         0.8689        61
+                     macro avg     0.8718    0.8734    0.8688        61
+                  weighted avg     0.8766    0.8689    0.8690        61

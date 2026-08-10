@@ -1,0 +1,2 @@
+Model,Test Accuracy,Test Precision,Test Recall,Test Specificity,Test F1,Test ROC-AUC,TN,FP,FN,TP
+Final ANN (ANN-1),0.9016,0.8438,0.9643,0.8485,0.9,0.9729,28,5,1,27

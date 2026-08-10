@@ -1,0 +1,6 @@
+Model,Search_Method,Candidate_Configurations,CV_Folds,Approximate_Fits_Performed,Best_CV_ROC_AUC
+Logistic Regression,GridSearchCV,36,5,180,0.9070318570318572
+Support Vector Machine,GridSearchCV,70,5,350,0.9047430830039527
+Random Forest,RandomizedSearchCV,60,5,300,0.9040860106077497
+XGBoost,RandomizedSearchCV,60,5,300,0.906080875646093
+K-Nearest Neighbors,GridSearchCV,108,5,540,0.8996337398511312

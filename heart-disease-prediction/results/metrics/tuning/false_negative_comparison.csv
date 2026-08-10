@@ -1,0 +1,6 @@
+Model,Baseline_FN,Tuned_FN,FN_Change
+Logistic Regression,2,3,1
+Support Vector Machine,2,4,2
+Random Forest,2,1,-1
+XGBoost,2,3,1
+K-Nearest Neighbors,3,3,0

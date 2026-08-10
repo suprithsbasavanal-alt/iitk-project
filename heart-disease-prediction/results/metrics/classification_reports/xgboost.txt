@@ -1,0 +1,11 @@
+Classification Report — XGBoost
+==================================================
+
+                                precision    recall  f1-score   support
+
+     Class 0: No Heart Disease     0.9259    0.7576    0.8333        33
+Class 1: Heart Disease Present     0.7647    0.9286    0.8387        28
+
+                      accuracy                         0.8361        61
+                     macro avg     0.8453    0.8431    0.8360        61
+                  weighted avg     0.8519    0.8361    0.8358        61

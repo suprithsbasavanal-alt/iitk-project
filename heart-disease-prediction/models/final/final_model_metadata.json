@@ -1,0 +1,26 @@
+{
+  "project": "Heart Disease Prediction Using Machine Learning and Deep Learning Techniques",
+  "dataset": "UCI Heart Disease Dataset (ID 45)",
+  "dataset_source": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+  "target_definition": "binary (0 = No Heart Disease, 1 = Heart Disease Present)",
+  "selected_model": "Tuned Random Forest",
+  "model_type": "RandomForestClassifier",
+  "hyperparameters": {
+    "n_estimators": 500,
+    "min_samples_split": 4,
+    "min_samples_leaf": 2,
+    "max_features": "log2",
+    "max_depth": null,
+    "class_weight": "balanced_subsample",
+    "random_state": 42
+  },
+  "training_rows": 242,
+  "test_rows": 61,
+  "random_state": 42,
+  "cv_strategy": "StratifiedKFold(n_splits=5, shuffle=True, random_state=42)",
+  "primary_selection_metric": "Multi-criteria (CV ROC-AUC, CV Recall, Test Recall, Test F1, Low FN)",
+  "selection_reason": "Tuned Random Forest achieved the highest Test Accuracy (0.9016), highest Test Recall (0.9643), highest Test F1 (0.9000), lowest False-Negative count (FN=1 out of 28 positive disease cases), strong CV ROC-AUC (0.9041), and highest CV Recall (0.8008) among all tuned models.",
+  "feature_count_before_preprocessing": 13,
+  "feature_count_after_preprocessing": 28,
+  "selection_timestamp": "2026-08-10T13:44:06.725108"
+}
