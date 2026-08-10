@@ -13,15 +13,16 @@ The objective is to develop and compare machine-learning and later deep-learning
 - Train, evaluate, and benchmark multiple machine learning classification models.
 - Apply cross-validation and hyperparameter tuning techniques for model optimization.
 - Execute transparent multi-criteria model selection and freeze the final machine learning pipeline artifact.
+- Develop an interactive web application (Streamlit) for deploying the frozen final machine learning model.
 - Extend the framework to include Deep Learning models in a subsequent phase.
 
 ## 4. Current Scope
-The current phase encompasses **Part 1 (Setup)**, **Part 2 (Dataset Integration)**, **Part 3 (Preprocessing Pipeline)**, **Part 4 (Exploratory Data Analysis)**, **Part 5 (Baseline Machine Learning Models)**, **Part 6 (Hyperparameter Tuning and Model Optimization)**, and **Part 7 (Final Machine Learning Model Selection, Final Evaluation and Model Freezing)**.
+The current phase encompasses **Part 1 (Setup)**, **Part 2 (Dataset Integration)**, **Part 3 (Preprocessing Pipeline)**, **Part 4 (Exploratory Data Analysis)**, **Part 5 (Baseline Machine Learning Models)**, **Part 6 (Hyperparameter Tuning and Model Optimization)**, **Part 7 (Final Machine Learning Model Selection, Final Evaluation and Model Freezing)**, and **Part 8 (Final Web Application / User Interface for Frozen Model)**.
 - The official UCI Heart Disease dataset (ID 45) is preserved as an immutable raw CSV (`data/raw/heart_disease_uci.csv`).
 - Target binary mapping (0 -> 0, 1-4 -> 1) and 80/20 stratified split (242 train / 61 test) are maintained.
-- Transparent multi-criteria model selection framework evaluated all 12 model configurations (7 baseline + 5 tuned).
 - **Tuned Random Forest** was selected as the final machine learning model, achieving **0.9016 Test Accuracy**, **0.9643 Test Recall**, **0.9000 Test F1**, **0.9567 Test ROC-AUC**, and reducing **False Negatives to 1**.
 - Complete final scikit-learn pipeline (`preprocessor` + `classifier`) has been fitted on training data and frozen under `models/final/final_model.joblib`.
+- An interactive web application built with Streamlit (`app.py`) provides end-to-end inference, risk probability scoring, input validation, and feature importance visualization.
 
 ## 5. Planned Machine Learning Models
 For the Machine Learning phase, we investigate and compare the following classification algorithms:
@@ -69,75 +70,77 @@ To comprehensively assess model performance, the following evaluation metrics ar
 - **Selection Rationale**: Tuned Random Forest achieved the highest Test Accuracy (**0.9016**), highest Test Recall (**0.9643**), highest Test F1 (**0.9000**), lowest False-Negative count (**FN=1** out of 28 positive disease cases), strong CV ROC-AUC (**0.9041**), and highest CV Recall (**0.8008**).
 - **Persisted Final Artifact**: Complete pipeline (`preprocessor` + `classifier`) saved in `models/final/final_model.joblib`.
 - **Metadata**: Preserved in `models/final/final_model_metadata.json`.
-- **Feature Importance**: Top clinical drivers (`thalach`, `oldpeak`, `cp`, `ca`, `thal`) saved in `results/final_feature_importance.csv` and `results/figures/final_feature_importance.png`.
-- **Inference Module**: Reusable, leak-free inference function `predict_heart_disease()` implemented in `src/predict.py` with complete input schema validation.
 
-## 12. Project Structure
+## 12. Web Application & User Interface (Part 8)
+- **Framework**: Streamlit (`app.py`)
+- **Inference Pipeline**: Directly consumes `models/final/final_model.joblib` via `src.predict.predict_heart_disease()`.
+- **Features Supported**: All 13 raw clinical predictors with input validation and preset example dataset loading.
+
+## 13. Project Structure
 ```text
 heart-disease-prediction/
 │
+├── app.py                          # Streamlit web application entry point
 ├── data/
 │   ├── raw/                        # Immutable raw dataset (heart_disease_uci.csv)
 │   └── processed/                  # Split CSV datasets (X_train_raw, X_test_raw, y_train, y_test)
 │
 ├── notebooks/
-│   ├── 01_eda.ipynb                # Executed EDA notebook with 14 sections & plots
-│   ├── 02_baseline_models.ipynb    # Executed Baseline Models notebook with CV & test results
+│   ├── 01_eda.ipynb                # Executed EDA notebook
+│   ├── 02_baseline_models.ipynb    # Executed Baseline Models notebook
 │   ├── 03_hyperparameter_tuning.ipynb # Executed Hyperparameter Tuning notebook
 │   └── 04_final_ml_model.ipynb     # Executed Final Machine Learning Model notebook
 │
 ├── src/
 │   ├── __init__.py                 # Package initializer
-│   ├── download_data.py            # Automated dataset acquisition script from UCI
+│   ├── download_data.py            # Dataset acquisition script
 │   ├── data_loader.py              # Data loading & validation utilities
-│   ├── preprocessing.py            # Target conversion, split & ColumnTransformer pipeline
-│   ├── eda.py                      # Reusable EDA engine & 21-figure Matplotlib generator
-│   ├── train.py                    # Baseline registry, search space definitions & CV engine
-│   ├── evaluate.py                 # Performance metrics, classification reports & ROC plots
-│   └── predict.py                  # Final model inference routines & input schema validation
+│   ├── preprocessing.py            # Preprocessing & split functions
+│   ├── eda.py                      # EDA engine & plot generator
+│   ├── train.py                    # Baseline registry & tuning search spaces
+│   ├── evaluate.py                 # Evaluation metrics & visualization routines
+│   └── predict.py                  # Final inference routines & input schema validation
 │
 ├── scripts/
 │   ├── verify_dataset.py           # Dataset verification script
-│   ├── verify_preprocessing.py     # 14-point preprocessing & leakage verification script
-│   ├── generate_eda.py             # Script reproducing all 21 EDA figures & 6 summary reports
-│   ├── verify_eda.py               # 14-point EDA verification script
-│   ├── train_baseline_models.py    # Master execution script training 7 baseline pipelines
-│   ├── verify_baseline_models.py   # 25-point baseline model verification suite
-│   ├── tune_models.py              # Master hyperparameter tuning execution script (5 models)
-│   ├── verify_tuning.py            # 27-point hyperparameter tuning verification suite
-│   ├── select_final_model.py       # Master final model selection & freezing execution script
-│   ├── test_final_prediction.py    # Prediction function & model reload verification script
-│   └── verify_final_model.py       # 20-point final model selection verification suite
+│   ├── verify_preprocessing.py     # Preprocessing verification script
+│   ├── generate_eda.py             # EDA figure generator script
+│   ├── verify_eda.py               # EDA verification script
+│   ├── train_baseline_models.py    # Master baseline execution script
+│   ├── verify_baseline_models.py   # Baseline verification suite
+│   ├── tune_models.py              # Master tuning execution script
+│   ├── verify_tuning.py            # Tuning verification suite
+│   ├── select_final_model.py       # Master final model selection & freezing script
+│   ├── test_final_prediction.py    # Prediction function & model reload test script
+│   ├── verify_final_model.py       # 20-point final model verification suite
+│   ├── test_app.py                 # Streamlit app integration test script
+│   └── verify_application.py       # 15-point master web application verification suite
 │
 ├── models/
 │   ├── preprocessor.joblib         # Fitted preprocessor transformer
-│   ├── baseline/                   # 7 Persisted complete baseline pipeline joblib files
-│   ├── tuned/                      # 5 Persisted complete tuned pipeline joblib files
+│   ├── baseline/                   # 7 Persisted baseline pipeline joblib files
+│   ├── tuned/                      # 5 Persisted tuned pipeline joblib files
 │   └── final/                      # Frozen final model pipeline & metadata (final_model.joblib)
 │
 ├── results/
-│   ├── dataset_metadata.txt
-│   ├── dataset_dictionary.csv
-│   ├── data_quality_report.txt
-│   ├── preprocessing_report.txt
-│   ├── processed_feature_names.txt
 │   ├── eda_*.csv                   # Summary CSV files from EDA phase
 │   ├── eda_report.txt
 │   ├── baseline_model_report.txt   # Comprehensive baseline experiment report
 │   ├── hyperparameter_tuning_report.txt # Comprehensive tuning experiment report
-│   ├── final_model_report.txt      # Comprehensive final ML model report (17 sections)
-│   ├── final_feature_importance.csv# Transformed feature importance rankings
+│   ├── final_model_report.txt      # Comprehensive final ML model report
+│   ├── application_report.txt      # Comprehensive web application report
+│   ├── final_feature_importance.csv# Transformed feature importances
 │   ├── figures/
 │   │   ├── 01_*.png to 21_*.png    # 21 EDA figures
-│   │   ├── models/                 # Baseline model confusion matrices & ROC curves
-│   │   ├── tuning/                 # Tuned model confusion matrices & ROC curves
+│   │   ├── models/                 # Baseline confusion matrices & ROC curves
+│   │   ├── tuning/                 # Tuned confusion matrices & ROC curves
 │   │   ├── final_model_confusion_matrix.png
 │   │   ├── final_model_roc_curve.png
 │   │   ├── final_model_comparison.png
 │   │   └── final_feature_importance.png
 │   └── metrics/
 │       ├── baseline_*.csv          # Baseline CV and test metrics CSVs
-│       ├── tuning/                 # Tuning search results, best params & test CSVs
+│       ├── tuning/                 # Tuning search results & test CSVs
 │       └── model_selection_comparison.csv # 12-model benchmark comparison table
 │
 ├── tests/
@@ -145,7 +148,8 @@ heart-disease-prediction/
 │   ├── test_train.py               # Unit test suite for Part 5 train module
 │   ├── test_evaluate.py            # Unit test suite for Part 5 evaluate module
 │   ├── test_tuning.py              # Unit test suite for Part 6 tuning module
-│   └── test_final_model.py         # Unit test suite for Part 7 final model module
+│   ├── test_final_model.py         # Unit test suite for Part 7 final model module
+│   └── test_application.py         # Unit test suite for Part 8 web application module
 │
 ├── main.py                         # Application entry point script
 ├── requirements.txt                # Project dependencies
@@ -153,7 +157,7 @@ heart-disease-prediction/
 └── README.md                       # Project documentation
 ```
 
-## 13. Installation
+## 14. Installation
 
 ### Prerequisites
 - Python 3.8+ installed on your system.
@@ -195,84 +199,111 @@ heart-disease-prediction/
    pip install -r requirements.txt
    ```
 
-## 14. Running the Project
+## 15. Running the Web Application
 
-### Reproduce Final Model Selection & Run Verifications
+To launch the Streamlit graphical user interface locally:
 
-1. Execute multi-criteria model selection, freeze final pipeline, and generate reports:
+1. Ensure your virtual environment is activated and requirements are installed:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. Execute Streamlit:
+   ```bash
+   streamlit run app.py
+   ```
+
+3. Open your browser at the local Streamlit URL displayed in the terminal:
+   `http://localhost:8501`
+
+- **Final Model Artifact Used**: `models/final/final_model.joblib` (Tuned Random Forest).
+
+## 16. Reproduction Commands & Verifications
+
+1. Run master web application 15-point verification suite:
+   ```bash
+   python scripts/verify_application.py
+   ```
+
+2. Run Streamlit application integration test script:
+   ```bash
+   python scripts/test_app.py
+   ```
+
+3. Execute final model selection & freezing:
    ```bash
    python scripts/select_final_model.py
    ```
 
-2. Test final prediction function and model reload integrity:
+4. Test final model prediction routine & reloading:
    ```bash
    python scripts/test_final_prediction.py
    ```
 
-3. Run 20-point final model verification suite:
+5. Run 20-point final model verification suite:
    ```bash
    python scripts/verify_final_model.py
    ```
 
-4. Execute hyperparameter searches and freeze tuning configurations:
+6. Execute hyperparameter searches & freeze configurations:
    ```bash
    python scripts/tune_models.py
    ```
 
-5. Run 27-point hyperparameter tuning verification suite:
+7. Run 27-point hyperparameter tuning verification suite:
    ```bash
    python scripts/verify_tuning.py
    ```
 
-6. Train baseline models and evaluate baseline test set:
+8. Train baseline models and evaluate baseline test set:
    ```bash
    python scripts/train_baseline_models.py
    ```
 
-7. Run 25-point baseline model verification suite:
+9. Run 25-point baseline model verification suite:
    ```bash
    python scripts/verify_baseline_models.py
    ```
 
-8. Regenerate all 21 EDA figures and summary reports:
-   ```bash
-   python scripts/generate_eda.py
-   ```
+10. Regenerate all 21 EDA figures and summary reports:
+    ```bash
+    python scripts/generate_eda.py
+    ```
 
-9. Run 14-point EDA verification suite:
-   ```bash
-   python scripts/verify_eda.py
-   ```
+11. Run 14-point EDA verification suite:
+    ```bash
+    python scripts/verify_eda.py
+    ```
 
-10. Execute leakage-safe preprocessing pipeline:
+12. Execute leakage-safe preprocessing pipeline:
     ```bash
     python src/preprocessing.py
     ```
 
-11. Run 14-point preprocessing verification suite:
+13. Run 14-point preprocessing verification suite:
     ```bash
     python scripts/verify_preprocessing.py
     ```
 
-12. Run complete unit test suite (20 tests across all modules):
+14. Run complete unit test suite (26 tests across all modules):
     ```bash
     python -m unittest discover tests
     ```
 
-13. Run main project entry point:
+15. Run main project entry point:
     ```bash
     python main.py
     ```
 
-## 15. Dataset
+## 17. Dataset
 This project uses the official **Heart Disease Dataset** from the **UCI Machine Learning Repository** (Dataset ID: 45).
 - **Official URL**: [https://archive.ics.uci.edu/dataset/45/heart+disease](https://archive.ics.uci.edu/dataset/45/heart+disease)
 - **Instances**: 303 patient records
 - **Features**: 13 clinical attributes
 - **Target**: `num` (0 to 4) converted to binary classification target `target` (`0` = 164, `1` = 139).
 
-## 16. Future Deep Learning Module
-After the machine learning module is fully built, benchmarked, tuned, and frozen, the project will expand to include a **Deep Learning Module**.
+## 18. Future Deep Learning Module
+After the machine learning module is fully built, benchmarked, tuned, frozen, and deployed via Streamlit, the project will expand to include a **Deep Learning Module**.
 
-## 17. Disclaimer
+## 19. Disclaimer
 This project is conducted strictly for educational and academic research purposes as part of a college capstone project. The predictions generated by models built within this repository are statistical model outputs and do not constitute medical diagnosis or clinical advice.

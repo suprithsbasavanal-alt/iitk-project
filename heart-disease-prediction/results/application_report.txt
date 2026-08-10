@@ -1,0 +1,79 @@
+Final Web Application Documentation (Part 8)
+===================================================================
+Project: Heart Disease Prediction Using Machine Learning and Deep Learning Techniques
+Scope: Interactive Deployment Interface for Frozen Final Machine Learning Pipeline
+
+1. Application Purpose
+----------------------
+The Part 8 Web Application provides a user-friendly, interactive graphical interface (GUI) for the frozen final machine learning pipeline (Tuned Random Forest). It enables researchers and users to input clinical diagnostic variables, receive instant leak-free risk assessments, view class probabilities, explore model feature importances, and inspect benchmarking metrics without retraining or modifying model parameters.
+
+2. Technology Stack
+-------------------
+- Frontend & Web Server: Streamlit (v1.42.0+)
+- Machine Learning Backend: Scikit-Learn (v1.6+), Joblib
+- Data Processing: Pandas, NumPy
+- Caching: `@st.cache_resource` (model artifact), `@st.cache_data` (metadata, data tables)
+
+3. Input Features Supported (13 Predictors)
+------------------------------------------
+1. Age (age): 20–100 years [Dataset range: 29–77]
+2. Sex (sex): Male (1), Female (0)
+3. Chest Pain Type (cp): 1 = Typical Angina, 2 = Atypical Angina, 3 = Non-Anginal Pain, 4 = Asymptomatic
+4. Resting Blood Pressure (trestbps): mm Hg [Dataset range: 94–200]
+5. Serum Cholesterol (chol): mg/dl [Dataset range: 126–564]
+6. Fasting Blood Sugar > 120 mg/dl (fbs): False (0), True (1)
+7. Resting ECG Results (restecg): 0 = Normal, 1 = ST-T Wave Abnormality, 2 = Left Ventricular Hypertrophy
+8. Maximum Heart Rate (thalach): bpm [Dataset range: 71–202]
+9. Exercise-Induced Angina (exang): No (0), Yes (1)
+10. ST Depression (oldpeak): float 0.0–10.0 [Dataset range: 0.0–6.2]
+11. ST Segment Slope (slope): 1 = Upsloping, 2 = Flat, 3 = Downsloping
+12. Number of Major Vessels (ca): 0, 1, 2, 3 vessels
+13. Thalassemia (thal): 3 = Normal, 6 = Fixed Defect, 7 = Reversible Defect
+
+4. Prediction Flow & Architecture
+---------------------------------
+User Form Input -> Input Schema Validation (`src.predict.validate_input_data`) -> Loaded Frozen Pipeline (`models/final/final_model.joblib`) -> ColumnTransformer (`preprocessor`) -> RandomForestClassifier (`classifier`) -> Raw Predictions & Probabilities (`predict_proba`) -> Streamlit Display (`st.success` / `st.warning` / `st.metric`).
+
+5. Final Model Artifact Specifications
+--------------------------------------
+- Selected Model: Tuned Random Forest (`RandomForestClassifier`)
+- Artifact Path: `models/final/final_model.joblib`
+- Metadata Path: `models/final/final_model_metadata.json`
+- Frozen Hyperparameters: n_estimators=500, min_samples_split=4, min_samples_leaf=2, max_features='log2', max_depth=None, class_weight='balanced_subsample', random_state=42.
+
+6. Model Performance on Held-Out Test Set (61 Rows)
+---------------------------------------------------
+- Test Accuracy:    90.16% (55 / 61 correct)
+- Test Precision:   84.38% (27 / 32 predicted positive correct)
+- Test Sensitivity: 96.43% (27 / 28 actual positive cases detected)
+- Test Specificity: 84.85% (28 / 33 actual negative cases detected)
+- Test F1 Score:    90.00%
+- Test ROC-AUC:     0.9567
+- Confusion Matrix: TN=28, FP=5, FN=1, TP=27
+
+7. Validation & Schema Enforcement
+----------------------------------
+- Schema checks enforce presence of all 13 predictor columns.
+- Inputs are coerced to numeric types; missing or malformed inputs raise user-friendly Streamlit warning banners.
+- No model retraining or hyperparameter search occurs when the application runs.
+
+8. Error Handling & Security
+----------------------------
+- Catches missing model files, corrupted inputs, and pipeline errors cleanly.
+- Operates 100% locally with zero external network data transmission.
+- Does not collect or store personally identifiable patient information.
+
+9. Educational Disclaimer
+-------------------------
+"This application is an educational/research demonstration created for a college capstone project. It is not a clinically validated medical diagnostic system and should not be used for medical decision-making."
+
+10. How to Run Locally
+----------------------
+1. Activate virtual environment:
+   `source .venv/bin/activate`
+2. Install requirements:
+   `pip install -r requirements.txt`
+3. Launch Streamlit application:
+   `streamlit run app.py`
+4. Access local web interface:
+   `http://localhost:8501`
