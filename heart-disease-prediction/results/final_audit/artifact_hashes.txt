@@ -1,0 +1,14 @@
+======================================================================
+FROZEN MODEL ARTIFACT SHA-256 HASH AUDIT (PART 12)
+======================================================================
+File: models/final/final_model.joblib
+SHA-256: 75b6bec6abc7ab26de232971f8ae3ba589f714621bbb15d11f3d5e8870df5b45
+
+File: models/final/final_model_metadata.json
+SHA-256: d05fe909cab8073e7c412bb85035d3c9a89a1b04d1154072a781262f71b56eb9
+
+File: models/deep_learning/final_ann.keras
+SHA-256: c72d15db2e726e347ade67b3da6d87682444fef74988fb3aaa9c2d83942b2f27
+
+Status: VERIFIED & IMMUTABLE
+======================================================================

@@ -1,0 +1,25 @@
+======================================================================
+FINAL MACHINE LEARNING MODEL AUDIT REPORT (PART 12)
+======================================================================
+Selected Final Model: Tuned Random Forest (RandomForestClassifier)
+Artifact Location: models/final/final_model.joblib
+Metadata Location: models/final/final_model_metadata.json
+Frozen Hyperparameters:
+  - n_estimators: 500
+  - min_samples_split: 4
+  - min_samples_leaf: 2
+  - max_features: "log2"
+  - max_depth: None
+  - class_weight: "balanced_subsample"
+  - random_state: 42
+
+Verified Held-Out Test Set Performance (61 Test Rows):
+  - Test Accuracy:    0.9016 (55 / 61 correct)
+  - Test Precision:   0.8438 (27 / 32 predicted positive correct)
+  - Test Recall:      0.9643 (27 / 28 disease cases detected)
+  - Test Specificity: 0.8485 (28 / 33 healthy cases detected)
+  - Test F1-Score:    0.9000
+  - Test ROC-AUC:     0.9567
+  - Confusion Matrix: TN = 28, FP = 5, FN = 1, TP = 27
+Final ML Audit Status: VERIFIED & CONSISTENT
+======================================================================

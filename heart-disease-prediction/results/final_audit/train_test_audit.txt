@@ -1,0 +1,10 @@
+======================================================================
+TRAIN / TEST SPLIT AUDIT REPORT (PART 12)
+======================================================================
+Split Strategy: Stratified 80/20 Train/Test Split (random_state = 42)
+Training Dataset (X_train_raw.csv, y_train.csv): 242 rows (80%)
+Held-Out Test Dataset (X_test_raw.csv, y_test.csv): 61 rows (20%)
+Target Distribution in Train (242): 131 No Disease (0) / 111 Disease (1)
+Target Distribution in Test (61):  33 No Disease (0) / 28 Disease (1)
+Data Leakage Prevention Check: PASS (Test set isolated across all stages)
+======================================================================

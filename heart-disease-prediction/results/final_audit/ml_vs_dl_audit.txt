@@ -1,0 +1,22 @@
+======================================================================
+MACHINE LEARNING VS DEEP LEARNING AUDIT REPORT (PART 12)
+======================================================================
+Benchmark Comparison Table:
+
+Metric              Tuned Random Forest (ML)    Final ANN-3 (DL)
+-----------------------------------------------------------------
+Test Accuracy       90.16%                      85.25%
+Test Precision      84.38%                      79.41%
+Test Recall         96.43%                      96.43%
+Test Specificity    84.85%                      75.76%
+Test F1-Score       90.00%                      87.10%
+Test ROC-AUC        0.9567                      0.9253
+False Negatives     1                           1
+False Positives     5                           8
+
+Empirical Synthesis & Conclusion:
+"The tuned Random Forest achieved stronger overall test performance than the ANN
+on this specific held-out test set (higher Accuracy, Precision, Specificity, F1, and ROC-AUC),
+while both models achieved identical high sensitivity (96.43% Recall, detecting 27 of 28 disease cases)."
+ML vs DL Audit Status: VERIFIED & CONSISTENT
+======================================================================

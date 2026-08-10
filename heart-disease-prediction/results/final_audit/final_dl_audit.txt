@@ -1,0 +1,23 @@
+======================================================================
+DEEP LEARNING AUDIT REPORT (PART 12)
+======================================================================
+Final DL Architecture: ANN-3 (Multi-Layer Perceptron)
+Keras Model Artifact: models/deep_learning/final_ann.keras
+Architecture Specification:
+  - Input Layer: 28 transformed features
+  - Hidden Layer 1: Dense 64 (ReLU), Dropout 0.30
+  - Hidden Layer 2: Dense 32 (ReLU), Dropout 0.20
+  - Hidden Layer 3: Dense 16 (ReLU), Dropout 0.10
+  - Output Layer: Dense 1 (Sigmoid)
+Frozen Configuration: results/metrics/deep_learning/frozen_ann_configuration.json
+
+Verified Held-Out Test Set Performance (61 Test Rows):
+  - Test Accuracy:    0.8525 (52 / 61 correct)
+  - Test Precision:   0.7941 (27 / 34 predicted positive correct)
+  - Test Recall:      0.9643 (27 / 28 disease cases detected)
+  - Test Specificity: 0.7576 (25 / 33 healthy cases detected)
+  - Test F1-Score:    0.8710
+  - Test ROC-AUC:     0.9253
+  - Confusion Matrix: TN = 25, FP = 8, FN = 1, TP = 27
+Final DL Audit Status: VERIFIED & CONSISTENT
+======================================================================

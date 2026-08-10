@@ -1,0 +1,17 @@
+======================================================================
+MANUAL SCREENSHOT CAPTURE CHECKLIST (PART 12)
+======================================================================
+To compile visual demonstration assets for live defense, capture the following
+8 manual screenshots while running `streamlit run app.py`:
+
+[ ] 1. `streamlit_app_homepage.png`: Main header, disclaimer banner, navigation sidebar.
+[ ] 2. `streamlit_input_form.png`: Clinical features input controls (Age, Blood Pressure, etc.).
+[ ] 3. `streamlit_example_patient.png`: Selecting example patient record from dropdown.
+[ ] 4. `streamlit_ml_prediction.png`: Output of Tuned Random Forest model prediction.
+[ ] 5. `streamlit_dl_prediction.png`: Output of Deep Learning ANN model prediction.
+[ ] 6. `streamlit_probability_gauge.png`: Heart disease risk probability metrics.
+[ ] 7. `streamlit_ml_vs_dl_comparison.png`: Expandable ML vs DL benchmark table and chart.
+[ ] 8. `streamlit_feature_importance.png`: Expandable feature importance ranking table.
+
+Note: Save captured screenshots in `results/figures/app_screenshots/` for presentation slides.
+======================================================================

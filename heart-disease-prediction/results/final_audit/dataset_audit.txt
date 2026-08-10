@@ -1,0 +1,15 @@
+======================================================================
+DATASET AUDIT REPORT (PART 12)
+======================================================================
+Dataset Name: UCI Heart Disease Dataset (Cleveland Subset, ID 45)
+Source File: data/raw/heart_disease_uci.csv
+Total Observations (Rows): 303
+Total Columns: 14 (13 Predictor Attributes + 1 Target Attribute 'num')
+Binary Target Mapping: 0 = No Heart Disease (164 rows), 1 = Heart Disease Present (139 rows)
+Missing Values Count:
+  - ca: 4 missing values
+  - thal: 2 missing values
+  - Total Missing: 6 values across 2 features
+Duplicate Rows: 0
+Dataset Integrity Status: VERIFIED & IMMUTABLE (Raw CSV untouched)
+======================================================================

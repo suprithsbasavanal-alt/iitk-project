@@ -1,0 +1,14 @@
+======================================================================
+PREPROCESSING AUDIT REPORT (PART 12)
+======================================================================
+Continuous Features (5): age, trestbps, chol, thalach, oldpeak
+  - Imputation Strategy: SimpleImputer(strategy="median")
+  - Scaling Strategy: StandardScaler()
+Categorical Features (8): sex, cp, fbs, restecg, exang, slope, ca, thal
+  - Imputation Strategy: SimpleImputer(strategy="most_frequent")
+  - Encoding Strategy: OneHotEncoder(handle_unknown="ignore", sparse_output=False)
+Preprocessed Feature Dimension: 28 transformed numeric features
+Fitting Isolation: Preprocessor fitted STRICTLY on X_train_raw.csv
+Persisted Artifact: models/preprocessor.joblib
+Preprocessing Status: VERIFIED & LEAKAGE-FREE
+======================================================================
