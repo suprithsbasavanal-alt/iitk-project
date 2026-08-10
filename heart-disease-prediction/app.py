@@ -38,6 +38,28 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Inject Custom CSS to Guarantee No Button Text Wrapping and Optimal Container Layout
+st.markdown("""
+<style>
+    /* Prevent button text wrapping */
+    div.stButton > button {
+        white-space: nowrap !important;
+        min-width: 200px !important;
+    }
+    /* Main layout container optimization */
+    .block-container {
+        padding-top: 1.5rem !important;
+        padding-bottom: 3rem !important;
+        max-width: 1200px !important;
+    }
+    /* Form styling */
+    div[data-testid="stForm"] {
+        border-radius: 10px;
+        padding: 1.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 
 # Cached Resource Loaders
 @st.cache_resource
@@ -207,31 +229,31 @@ def main():
         st.error(f"Error loading ML model artifact: {e}. Please ensure `models/final/final_model.joblib` exists.")
         return
 
-    # Sample Record Loader & Reset Controls (Optimized Column Ratios for Responsive UI)
+    # Sample Record Loader & Reset Controls (Dedicated Full-Width Row Layout)
     sample_df = get_sample_test_records()
     
-    col_demo1, col_demo2 = st.columns([3.5, 1.5], gap="large")
-    
-    with col_demo1:
-        if not sample_df.empty:
-            st.selectbox(
-                "💡 Select an Example Patient Record from Held-Out Test Set (for Demonstration):",
-                options=[None] + list(range(len(sample_df))),
-                format_func=lambda x: "Choose an example patient record..." if x is None else f"Patient Record #{x + 1} (Age: {sample_df.iloc[x]['age']}, Sex: {'Male' if sample_df.iloc[x]['sex']==1 else 'Female'}, Max HR: {sample_df.iloc[x]['thalach']})",
-                key="sample_patient_selector",
-                on_change=load_example_patient_callback,
-                args=(sample_df,)
-            )
+    st.markdown("#### 💡 Demonstration Controls")
+    if not sample_df.empty:
+        st.selectbox(
+            "Select an Example Patient Record from Held-Out Test Set (for Demonstration):",
+            options=[None] + list(range(len(sample_df))),
+            format_func=lambda x: "Choose an example patient record..." if x is None else f"Patient Record #{x + 1} (Age: {sample_df.iloc[x]['age']}, Sex: {'Male' if sample_df.iloc[x]['sex']==1 else 'Female'}, Max HR: {sample_df.iloc[x]['thalach']})",
+            key="sample_patient_selector",
+            on_change=load_example_patient_callback,
+            args=(sample_df,)
+        )
 
-    with col_demo2:
-        st.write("") # Vertical alignment spacer
-        st.write("")
+    # Dedicated Reset Button Container (Guaranteed single-line width)
+    btn_col1, btn_col2 = st.columns([1, 3], gap="medium")
+    with btn_col1:
         st.button("🔄 Reset Inputs", on_click=reset_all_inputs, use_container_width=True)
 
     # Show info banner if an example record is active
     current_sample = st.session_state.get("sample_patient_selector")
     if current_sample is not None and not sample_df.empty:
         st.info(f"Loaded Patient Record #{current_sample + 1} from held-out test set — for demonstration only.")
+
+    st.markdown("---")
 
     # Main Clinical Input Form
     with st.form("patient_prediction_form"):
@@ -250,7 +272,7 @@ def main():
 
         # --- Section 1: Patient Information ---
         st.markdown("#### 1. Patient Demographic Information")
-        c1, c2 = st.columns(2, gap="medium")
+        c1, c2 = st.columns(2, gap="large")
         with c1:
             age = st.number_input(
                 "Age (years)",
@@ -273,7 +295,7 @@ def main():
 
         # --- Section 2: Clinical Measurements ---
         st.markdown("#### 2. Physiological & Hemodynamic Measurements")
-        c3, c4 = st.columns(2, gap="medium")
+        c3, c4 = st.columns(2, gap="large")
         with c3:
             trestbps = st.number_input(
                 "Resting Blood Pressure (mm Hg)",
@@ -310,7 +332,7 @@ def main():
 
         # --- Section 3: Heart & ECG Characteristics ---
         st.markdown("#### 3. Cardiac & Electrocardiographic Characteristics")
-        c5, c6 = st.columns(2, gap="medium")
+        c5, c6 = st.columns(2, gap="large")
         
         with c5:
             cp_options = {
@@ -394,7 +416,11 @@ def main():
                 help="Thalassemia nuclear blood disorder status"
             )
 
-        submit_btn = st.form_submit_button("🩺 Predict Heart Disease Risk", type="primary", use_container_width=True)
+        st.markdown("---")
+        
+        form_btn_col1, form_btn_col2, form_btn_col3 = st.columns([1, 2, 1])
+        with form_btn_col2:
+            submit_btn = st.form_submit_button("🩺 Predict Heart Disease Risk", type="primary", use_container_width=True)
 
     # Execution of Model Prediction Routine
     if submit_btn:
