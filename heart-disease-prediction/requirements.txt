@@ -7,3 +7,5 @@ joblib
 xgboost
 ucimlrepo
 streamlit
+keras
+torch

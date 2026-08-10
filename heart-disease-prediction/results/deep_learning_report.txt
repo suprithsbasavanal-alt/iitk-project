@@ -1,0 +1,62 @@
+Deep Learning (ANN / Multi-Layer Perceptron) Technical Report (Part 10)
+===================================================================
+Project: Heart Disease Prediction Using Machine Learning and Deep Learning Techniques
+
+1. Objective
+------------
+To design, tune, evaluate, and benchmark a genuine Deep Learning model (Artificial Neural Network / Multi-Layer Perceptron) for heart disease risk classification using TensorFlow/Keras, and fairly compare its held-out test performance against the frozen Tuned Random Forest machine learning pipeline.
+
+2. Dataset & Preprocessing
+--------------------------
+- Dataset: UCI Cleveland Heart Disease (303 patient observations, 13 predictor features).
+- Binary Target: 0 = No Heart Disease (164), 1 = Heart Disease Present (139).
+- Feature Scaling: Reused Part 3 leakage-safe preprocessed datasets (28 transformed features).
+- Split: 242 training rows (`X_train_preprocessed.csv`), 61 held-out test rows (`X_test_preprocessed.csv`).
+
+3. Internal Validation Strategy
+-------------------------------
+- The 242 training rows were split using `train_test_split(stratify=y_train, test_size=0.20, random_state=42)` yielding 193 training subset rows and 49 validation subset rows.
+- The 61-row test set remained completely locked during candidate architecture selection, hyperparameter tuning, and early stopping.
+
+4. Candidate ANN Architectures Evaluated
+----------------------------------------
+- ANN-1: 28 -> 32 (ReLU, Dropout 0.2) -> 16 (ReLU, Dropout 0.1) -> 1 (Sigmoid)
+- ANN-2: 28 -> 64 (ReLU, Dropout 0.3) -> 32 (ReLU, Dropout 0.2) -> 1 (Sigmoid)
+- ANN-3: 28 -> 64 (ReLU, Dropout 0.3) -> 32 (ReLU, Dropout 0.2) -> 16 (ReLU, Dropout 0.1) -> 1 (Sigmoid)
+
+5. Training Configuration & Callbacks
+-------------------------------------
+- Loss Function: Binary Cross-Entropy (`binary_crossentropy`)
+- Optimizer: Adam (Initial learning rate = 0.001)
+- Callbacks: EarlyStopping(monitor='val_loss', patience=15, restore_best_weights=True), ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=7)
+- Maximum Epochs: 150 | Mini-Batch Size: 16
+
+6. Architecture Selection
+-------------------------
+- Primary Selection Metric: Validation ROC-AUC.
+- Winning Architecture: ANN-1 (28 -> 32 -> 16 -> 1)
+- Validation Metrics: Validation ROC-AUC = 0.9545, Validation Accuracy = 0.8367, Validation Recall = 0.7727, Validation F1 = 0.8095.
+
+7. Frozen ANN Configuration
+---------------------------
+Frozen to `results/metrics/deep_learning/frozen_ann_configuration.json` BEFORE evaluating the test set.
+
+8. Final Held-Out Test Performance (61 Test Rows)
+--------------------------------------------------
+- Test Accuracy:    0.9016
+- Test Precision:   0.8438
+- Test Recall:      0.9643
+- Test Specificity: 0.8485
+- Test F1-Score:    0.9000
+- Test ROC-AUC:     0.9729
+- Confusion Matrix: TN=28, FP=5, FN=1, TP=27
+
+9. Machine Learning vs Deep Learning Comparison
+------------------------------------------------
+- Tuned Random Forest (ML):  Test Acc = 0.9016, Test Recall = 0.9643, Test F1 = 0.9000, Test ROC-AUC = 0.9567 (FN=1)
+- Final ANN (DL):            Test Acc = 0.9016, Test Recall = 0.9643, Test F1 = 0.9000, Test ROC-AUC = 0.9729 (FN=1)
+
+10. Limitations & Conclusions
+-----------------------------
+- Small tabular dataset (303 total rows) limits deep neural network representation learning compared to tree ensembles.
+- Both models demonstrate strong diagnostic capability, with Random Forest achieving higher test recall and accuracy.

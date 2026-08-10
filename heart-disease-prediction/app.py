@@ -1,32 +1,38 @@
 """
-Streamlit Web Application for Heart Disease Prediction (Part 8).
+Streamlit Web Application for Heart Disease Prediction (Part 8 & Part 10).
 
 This application serves as the interactive deployment interface for the frozen final machine
-learning pipeline (Tuned Random Forest). It provides user controls for all 13 clinical predictors,
-validates schema inputs, executes inference via `src.predict`, displays risk probabilities,
-visualizes feature importance, and provides prominent educational disclaimers.
+learning pipeline (Tuned Random Forest) and the benchmarked Deep Learning pipeline (ANN).
+It provides user controls for all 13 clinical predictors, validates schema inputs,
+executes leak-free inference, displays risk probabilities, visualizes feature importances,
+compares ML vs DL performance, and provides prominent educational disclaimers.
 
 Run locally:
     streamlit run app.py
 """
 
-from pathlib import Path
 import json
+import os
+from pathlib import Path
 import sys
 import numpy as np
 import pandas as pd
 import streamlit as st
+
+# Enforce PyTorch backend for Keras
+os.environ["KERAS_BACKEND"] = "torch"
 
 # Ensure project root is on sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.predict import predict_heart_disease, load_final_model, REQUIRED_FEATURES
+from src.predict import predict_heart_disease, load_final_model, validate_input_data, REQUIRED_FEATURES
+from src.deep_learning import load_ann_model, predict_ann
 
 # Set Streamlit Page Configuration
 st.set_page_config(
-    page_title="Heart Disease Prediction | ML Capstone",
+    page_title="Heart Disease Prediction | ML & DL Capstone",
     page_icon="🫀",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -35,15 +41,34 @@ st.set_page_config(
 
 # Cached Resource Loaders
 @st.cache_resource
-def get_model():
-    """Load and cache the frozen final model pipeline."""
+def get_ml_model():
+    """Load and cache the frozen final ML model pipeline."""
     model_path = PROJECT_ROOT / "models" / "final" / "final_model.joblib"
     return load_final_model(model_path)
 
 
+@st.cache_resource
+def get_dl_model():
+    """Load and cache the frozen final Deep Learning ANN model."""
+    dl_model_path = PROJECT_ROOT / "models" / "deep_learning" / "final_ann.keras"
+    if dl_model_path.exists():
+        return load_ann_model(dl_model_path)
+    return None
+
+
+@st.cache_resource
+def get_preprocessor():
+    """Load preprocessor joblib to transform raw inputs for ANN inference."""
+    import joblib
+    prep_path = PROJECT_ROOT / "models" / "preprocessor.joblib"
+    if prep_path.exists():
+        return joblib.load(prep_path)
+    return None
+
+
 @st.cache_data
 def get_metadata():
-    """Load and cache final model metadata."""
+    """Load and cache final ML model metadata."""
     meta_path = PROJECT_ROOT / "models" / "final" / "final_model_metadata.json"
     if meta_path.exists():
         with open(meta_path, "r") as f:
@@ -70,6 +95,15 @@ def get_comparison_table():
 
 
 @st.cache_data
+def get_ml_vs_dl_table():
+    """Load and cache ML vs DL benchmark comparison table."""
+    comp_path = PROJECT_ROOT / "results" / "metrics" / "ml_vs_dl_comparison.csv"
+    if comp_path.exists():
+        return pd.read_csv(comp_path)
+    return pd.DataFrame()
+
+
+@st.cache_data
 def get_sample_test_records():
     """Load sample test records from X_test_raw.csv for demonstration."""
     test_path = PROJECT_ROOT / "data" / "processed" / "X_test_raw.csv"
@@ -84,7 +118,8 @@ def main():
     st.sidebar.markdown("---")
     st.sidebar.markdown("### Model Specification")
     st.sidebar.info(
-        "**Model**: Tuned Random Forest\n\n"
+        "**Primary Model**: Tuned Random Forest (ML)\n\n"
+        "**Secondary Model**: Multi-Layer Perceptron (DL ANN-3)\n\n"
         "**Dataset**: UCI Heart Disease (Cleveland)\n\n"
         "**Total Samples**: 303\n\n"
         "**Train Split**: 242 (80%)\n\n"
@@ -92,19 +127,18 @@ def main():
         "**Random Seed**: 42"
     )
     st.sidebar.markdown("---")
-    st.sidebar.markdown("### Performance on Test Set")
-    st.sidebar.metric("Test Accuracy", "90.16%")
-    st.sidebar.metric("Test Sensitivity (Recall)", "96.43%")
-    st.sidebar.metric("Test ROC-AUC", "0.9567")
-    st.sidebar.caption("Performance on the project's 61-row held-out test split.")
+    st.sidebar.markdown("### Held-Out Test Set Comparison")
+    st.sidebar.metric("Tuned Random Forest (ML) Acc", "90.16%", "96.43% Recall")
+    st.sidebar.metric("Final ANN (DL) Acc", "85.25%", "96.43% Recall")
+    st.sidebar.caption("Evaluated on the 61-row held-out test split.")
 
     # Main Page Header
     st.title("🫀 Heart Disease Risk Prediction System")
-    st.subheader("Machine Learning Capstone Project — Educational Demonstration")
+    st.subheader("Machine Learning & Deep Learning Capstone Project — Educational Demonstration")
     st.markdown(
-        "This application evaluates patient cardiovascular risk using a **frozen Tuned Random Forest** "
-        "pipeline trained on clinical diagnostic attributes from the UCI Heart Disease dataset. "
-        "Enter patient clinical indicators below to generate model risk estimates."
+        "This application evaluates patient cardiovascular risk using frozen **Machine Learning (Tuned Random Forest)** "
+        "and **Deep Learning (Artificial Neural Network - ANN)** pipelines trained on clinical diagnostic attributes "
+        "from the UCI Heart Disease dataset."
     )
     st.markdown("---")
 
@@ -115,11 +149,11 @@ def main():
         "and should not be used for medical decision-making."
     )
 
-    # Check Model Artifact Availability
+    # Check ML Model Artifact Availability
     try:
-        model = get_model()
+        ml_model = get_ml_model()
     except Exception as e:
-        st.error(f"Error loading model artifact: {e}. Please ensure `models/final/final_model.joblib` exists.")
+        st.error(f"Error loading ML model artifact: {e}. Please ensure `models/final/final_model.joblib` exists.")
         return
 
     # Sample Record Loader & Reset Controls
@@ -181,6 +215,17 @@ def main():
     # Main Clinical Input Form
     with st.form("patient_prediction_form"):
         st.markdown("### Patient Clinical Features Form")
+
+        # Model Architecture Selection Choice
+        selected_model_type = st.radio(
+            "Select Prediction Engine:",
+            options=["Machine Learning (Tuned Random Forest — Recommended)", "Deep Learning (Artificial Neural Network — ANN-3)"],
+            index=0,
+            horizontal=True,
+            help="Choose between the primary frozen Random Forest ML model or the secondary Deep Learning ANN model."
+        )
+
+        st.markdown("---")
 
         # --- Section 1: Patient Information ---
         st.markdown("#### 1. Patient Demographic Information")
@@ -320,7 +365,6 @@ def main():
                 6: "6 - Fixed Defect",
                 7: "7 - Reversible Defect"
             }
-            # Handle default_thal mapping if missing
             thal_keys = list(thal_options.keys())
             thal_idx = thal_keys.index(default_thal) if default_thal in thal_keys else 0
             thal = st.selectbox(
@@ -352,23 +396,38 @@ def main():
         }
 
         try:
-            result = predict_heart_disease(input_data)
-            pred_class = result["predicted_class"][0]
-            prob_disease = result["probability_disease"][0]
-            prob_no_disease = result["probability_no_disease"][0]
-            message = result["prediction_message"][0]
+            if "Machine Learning" in selected_model_type:
+                result = predict_heart_disease(input_data)
+                pred_class = result["predicted_class"][0]
+                prob_disease = result["probability_disease"][0]
+                prob_no_disease = result["probability_no_disease"][0]
+                engine_name = "Frozen Tuned Random Forest (ML)"
+            else:
+                dl_model = get_dl_model()
+                preprocessor = get_preprocessor()
+                if dl_model is None or preprocessor is None:
+                    st.error("Deep Learning model or preprocessor artifact not found.")
+                    return
+                
+                validated_df = validate_input_data(input_data)
+                X_trans = preprocessor.transform(validated_df)
+                dl_res = predict_ann(dl_model, X_trans)
+                pred_class = dl_res["predicted_class"][0]
+                prob_disease = dl_res["probability_disease"][0]
+                prob_no_disease = dl_res["probability_no_disease"][0]
+                engine_name = "Frozen Artificial Neural Network (DL ANN-3)"
 
-            st.markdown("### Model Output & Risk Estimation")
+            st.markdown(f"### Model Output & Risk Estimation (`{engine_name}`)")
             
             res_col1, res_col2, res_col3 = st.columns([2, 1, 1])
 
             with res_col1:
                 if pred_class == 1:
-                    st.error(f"### {message}")
-                    st.write("**Assessment**: The frozen Random Forest pipeline estimates elevated likelihood of cardiovascular disease presence.")
+                    st.error("### Model Prediction: Heart Disease Present")
+                    st.write(f"**Assessment**: The `{engine_name}` pipeline estimates elevated likelihood of cardiovascular disease presence.")
                 else:
-                    st.success(f"### {message}")
-                    st.write("**Assessment**: The frozen Random Forest pipeline estimates low likelihood of cardiovascular disease presence.")
+                    st.success("### Model Prediction: No Heart Disease")
+                    st.write(f"**Assessment**: The `{engine_name}` pipeline estimates low likelihood of cardiovascular disease presence.")
 
             with res_col2:
                 st.metric("Heart Disease Probability", f"{prob_disease * 100:.1f}%")
@@ -382,42 +441,30 @@ def main():
             st.error(f"An error occurred during model inference: {e}")
 
     # Expandable Details Sections
-    st.markdown("### 📊 Project Insights & Technical Details")
+    st.markdown("### 📊 Project Insights & Benchmark Details")
 
-    with st.expander("ℹ️ About the Frozen Model"):
+    with st.expander("🤖 Machine Learning vs Deep Learning Benchmark Comparison"):
+        ml_dl_df = get_ml_vs_dl_table()
+        if not ml_dl_df.empty:
+            st.dataframe(ml_dl_df, use_container_width=True)
+            ml_dl_fig_path = PROJECT_ROOT / "results" / "figures" / "deep_learning" / "ml_vs_dl_comparison.png"
+            if ml_dl_fig_path.exists():
+                st.image(str(ml_dl_fig_path), caption="ML vs DL Held-Out Test Metric Comparison", use_container_width=True)
+
+    with st.expander("ℹ️ About the Frozen Models"):
         metadata = get_metadata()
-        st.write("**Model Architecture**: Tuned Random Forest (`RandomForestClassifier`)")
-        st.write("**Pipeline Composition**: Complete scikit-learn `Pipeline([('preprocessor', ColumnTransformer), ('classifier', RandomForestClassifier)])`")
-        if metadata.get("hyperparameters"):
-            st.json(metadata["hyperparameters"])
-        st.markdown(
-            "**Test Set Performance Metrics** (Evaluated on 61-row held-out test split):\n"
-            "- **Accuracy**: 90.16%\n"
-            "- **Sensitivity (Recall)**: 96.43% (27/28 positive cases detected)\n"
-            "- **Specificity**: 84.85% (28/33 negative cases detected)\n"
-            "- **F1-Score**: 90.00%\n"
-            "- **ROC-AUC**: 0.9567\n"
-            "- **False Negatives**: 1\n"
-        )
+        st.write("**Primary Model (ML)**: Tuned Random Forest (`RandomForestClassifier`) — Test Acc: 90.16%, Recall: 96.43%, ROC-AUC: 0.9567")
+        st.write("**Secondary Model (DL)**: Artificial Neural Network (`ANN-3: 28->64->32->16->1`) — Test Acc: 85.25%, Recall: 96.43%, ROC-AUC: 0.9253")
 
     with st.expander("⭐ Model Feature Importance Rankings"):
         fi_df = get_feature_importance()
         if not fi_df.empty:
             st.caption("Feature importance indicates how the trained model used transformed features for prediction; it does not establish medical causation.")
             st.dataframe(fi_df.head(15), use_container_width=True)
-            
-            fi_fig_path = PROJECT_ROOT / "results" / "figures" / "final_feature_importance.png"
-            if fi_fig_path.exists():
-                st.image(str(fi_fig_path), caption="Top 15 Transformed Clinical Features (Gini Importance)", use_container_width=True)
-
-    with st.expander("📈 12-Model Selection Benchmark Table"):
-        comp_df = get_comparison_table()
-        if not comp_df.empty:
-            st.dataframe(comp_df, use_container_width=True)
 
     # Footer
     st.markdown("---")
-    st.caption("Heart Disease Prediction Capstone Project | Department of Computer Science & Engineering | Part 8 Web Application")
+    st.caption("Heart Disease Prediction Capstone Project | Department of Computer Science & Engineering | Part 10 DL Integration")
 
 
 if __name__ == "__main__":
