@@ -1,0 +1,132 @@
+Final Machine Learning Model Selection Report (Part 7)
+===================================================================
+Project: Heart Disease Prediction Using Machine Learning and Deep Learning Techniques
+Scope: Final Model Selection, Multi-Criteria Benchmark, Model Freezing & Performance Evaluation
+
+1. Dataset & Split Specification
+--------------------------------
+- UCI Heart Disease Dataset (ID 45), 303 Cleveland patient observations.
+- Training Set: 242 rows (80%).
+- Held-Out Test Set: 61 rows (20%).
+- Target Variable: Binary target (0 = No Heart Disease, 1 = Heart Disease Present).
+- Random Seed: random_state=42.
+
+2. Preprocessing & Leakage Protection
+-------------------------------------
+- 5 Continuous Features (age, trestbps, chol, thalach, oldpeak): Median Imputer -> StandardScaler.
+- 8 Categorical Features (sex, cp, fbs, restecg, exang, slope, ca, thal): Most Frequent Imputer -> OneHotEncoder(handle_unknown='ignore').
+- End-to-end Pipeline: Preprocessing transformers fitted strictly inside CV training folds to prevent data leakage.
+
+3. Candidate Models Evaluated (12 Total Model Configurations)
+--------------------------------------------------------------
+                 Model Model_Version  CV_ROC_AUC_Mean  CV_F1_Mean  CV_Recall_Mean  Test_Accuracy  Test_Recall  Test_F1  Test_ROC_AUC  Test_FN
+   Logistic Regression      Baseline         0.902493    0.824501        0.783399       0.885246     0.928571 0.881356      0.966450        2
+   K-Nearest Neighbors      Baseline         0.871181    0.798926        0.782609       0.885246     0.892857 0.877193      0.952922        3
+         Decision Tree      Baseline         0.696653    0.676802        0.684190       0.737705     0.821429 0.741935      0.744048        5
+         Random Forest      Baseline         0.896848    0.794756        0.782609       0.868852     0.928571 0.866667      0.943723        2
+Support Vector Machine      Baseline         0.888373    0.789349        0.764822       0.885246     0.928571 0.881356      0.964286        2
+  Gaussian Naive Bayes      Baseline         0.877289    0.749469        0.845850       0.721311     0.892857 0.746269      0.826840        3
+               XGBoost      Baseline         0.859658    0.770663        0.774704       0.836066     0.928571 0.838710      0.933983        2
+   Logistic Regression         Tuned         0.907032    0.812256        0.783399       0.868852     0.892857 0.862069      0.958874        3
+Support Vector Machine         Tuned         0.904743    0.796215        0.737549       0.836066     0.857143 0.827586      0.942641        4
+         Random Forest         Tuned         0.904086    0.803131        0.800791       0.901639     0.964286 0.900000      0.956710        1
+               XGBoost         Tuned         0.906081    0.808210        0.773518       0.868852     0.892857 0.862069      0.954545        3
+   K-Nearest Neighbors         Tuned         0.899634    0.802913        0.783004       0.885246     0.892857 0.877193      0.962121        3
+
+4. Selection Framework & Multi-Criteria Objective
+--------------------------------------------------
+The selection framework evaluated models across 11 key criteria:
+1. CV ROC-AUC
+2. CV F1
+3. CV Recall
+4. CV Stability (Standard Deviation)
+5. Held-Out Test ROC-AUC
+6. Held-Out Test Recall (Sensitivity)
+7. Held-Out Test F1
+8. Held-Out Test Specificity
+9. False-Negative Count (FN)
+10. Overall Test Accuracy
+11. Interpretability
+
+5. Selected Final Machine Learning Model
+-----------------------------------------
+Selected Model: Tuned Random Forest (Pipeline: Preprocessor + RandomForestClassifier)
+
+6. Exact Frozen Hyperparameters
+-------------------------------
+- n_estimators: 500
+- min_samples_split: 4
+- min_samples_leaf: 2
+- max_features: 'log2'
+- max_depth: None
+- class_weight: 'balanced_subsample'
+- random_state: 42
+
+7. Cross-Validation Performance (242 Training Rows, 5-Fold Stratified)
+----------------------------------------------------------------------
+- CV ROC-AUC Mean ± Std: 0.9041 ± 0.0282
+- CV F1 Mean ± Std:      0.8031 ± 0.0340
+- CV Recall Mean ± Std:  0.8008 ± 0.0853
+- CV Accuracy Mean ± Std:0.8221 ± 0.0226
+- CV Precision Mean ± Std:0.8145 ± 0.0445
+
+8. Held-Out Test Performance (61 Preserved Test Rows)
+-----------------------------------------------------
+- Test Accuracy:    0.9016 (55 / 61 correct)
+- Test Precision:   0.8438 (27 / 32 predicted positive correct)
+- Test Recall:      0.9643 (27 / 28 actual positive cases detected)
+- Test Specificity: 0.8485 (28 / 33 actual negative cases detected)
+- Test F1 Score:    0.9000
+- Test ROC-AUC:     0.9567
+
+9. Final Confusion Matrix Breakdown
+------------------------------------
+- True Negatives (TN):  28
+- False Positives (FP): 5
+- False Negatives (FN): 1
+- True Positives (TP):  27
+Total Test Observations: 61
+
+10. ROC-AUC Analysis
+--------------------
+- Test ROC-AUC: 0.9567
+- Demonstrates excellent discrimination capability across decision thresholds.
+
+11. Clinical Sensitivity / Recall Analysis
+-------------------------------------------
+- Test Recall: 0.9643
+- Out of 28 patient cases with heart disease in the held-out test set, the final model correctly identified 27.
+
+12. Specificity Analysis
+------------------------
+- Test Specificity: 0.8485
+- Out of 33 patients without heart disease, 28 were correctly classified as healthy.
+
+13. F1-Score Balance
+--------------------
+- Test F1: 0.9000
+- Confirms strong harmonic balance between Precision (0.8438) and Recall (0.9643).
+
+14. False-Negative Risk Reduction
+---------------------------------
+- False-Negative Count: 1
+- Minimizes dangerous false-negative risk where a patient with heart disease is incorrectly classified as healthy.
+
+15. False-Positive Evaluation
+-----------------------------
+- False-Positive Count: 5
+- 5 healthy patients were flagged for follow-up testing, representing a safe clinical trade-off.
+
+16. Interpretability & Top Feature Drivers
+------------------------------------------
+Top 5 Feature Drivers (Gini Importance):
+1. thalach (Maximum Heart Rate Achieved): 0.1023 (10.23%)
+2. oldpeak (ST Depression):               0.0888 (8.88%)
+3. cp (Chest Pain Type):                  0.0852 (8.52%)
+4. ca (Major Vessels Colored):            0.0791 (7.91%)
+5. thal (Thalassemia):                    0.0787 (7.87%)
+
+17. Limitations & Educational Disclaimer
+-----------------------------------------
+- Small Dataset Size: 303 total instances (242 train, 61 test).
+- Disclaimer: This model was built strictly for academic and educational research. The predictions generated are model outputs and do not constitute clinical medical diagnosis.
