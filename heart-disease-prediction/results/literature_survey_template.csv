@@ -1,0 +1,2 @@
+Sl No,Author/Year,Paper Title,Journal/Context,Publisher,Techniques,Methods,Dataset Name,Main Method,Limitations,Summary
+1,Template Author (Year),Sample Paper Title on Machine Learning for Heart Disease,Sample Journal of Biomedical Informatics,Sample Publisher,Logistic Regression / Random Forest,5-Fold Cross-Validation,UCI Heart Disease Cleveland,Grid Search Hyperparameter Tuning,Small Sample Size (303 rows),Sample Literature Summary Template Entry

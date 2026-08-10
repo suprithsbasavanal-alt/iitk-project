@@ -1,0 +1,26 @@
+Streamlit Web Application Screenshot Checklist (Part 9)
+===================================================================
+Project: Heart Disease Prediction Using Machine Learning and Deep Learning Techniques
+
+The following recommended application screenshots can be captured by running `streamlit run app.py` locally at http://localhost:8501:
+
+[ ] 1. Home Page Header & Sidebar Overview
+       - Capture main title "Heart Disease Risk Prediction System", subtitle, and left sidebar model specification metrics.
+
+[ ] 2. Clinical Input Form Layout
+       - Capture the 3 structured form sections: Patient Demographic Information, Physiological Measurements, and Cardiac Characteristics.
+
+[ ] 3. Example Patient Record Loaded
+       - Capture the dropdown selection of an example patient record from the held-out test dataset demonstrating pre-populated input controls.
+
+[ ] 4. Prediction Result Banner
+       - Capture the `Model Prediction: No Heart Disease` (green) or `Model Prediction: Heart Disease Present` (amber) output container after form submission.
+
+[ ] 5. Probability Metrics & Educational Disclaimer
+       - Capture the `Heart Disease Probability (%)` and `No Disease Probability (%)` metric cards alongside the prominent educational warning banner.
+
+[ ] 6. "About the Frozen Model" Expander
+       - Capture the expanded model architecture details, frozen hyperparameter JSON, and held-out test performance metrics summary.
+
+[ ] 7. "Model Feature Importance Rankings" Expander
+       - Capture the expanded feature importance table and horizontal bar chart illustrating top clinical risk drivers (`thalach`, `oldpeak`, `cp_4.0`, etc.).
