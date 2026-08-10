@@ -112,7 +112,58 @@ def get_sample_test_records():
     return pd.DataFrame()
 
 
+# Intended Default Values Dictionary for 13 Predictors
+DEFAULT_INPUT_VALUES = {
+    "sample_patient_selector": None,
+    "input_model_type": "Machine Learning (Tuned Random Forest — Recommended)",
+    "input_age": 55,
+    "input_sex": 1,
+    "input_cp": 1,
+    "input_trestbps": 130,
+    "input_chol": 240,
+    "input_fbs": 0,
+    "input_restecg": 0,
+    "input_thalach": 150,
+    "input_exang": 0,
+    "input_oldpeak": 1.0,
+    "input_slope": 1,
+    "input_ca": 0,
+    "input_thal": 3
+}
+
+
+def reset_all_inputs():
+    """Reset Callback: Restore all widget keys in st.session_state to normal default values."""
+    for key, val in DEFAULT_INPUT_VALUES.items():
+        st.session_state[key] = val
+
+
+def load_example_patient_callback(sample_df: pd.DataFrame):
+    """Callback triggered when user selects an example patient record from dropdown."""
+    idx = st.session_state.get("sample_patient_selector")
+    if idx is not None and not sample_df.empty:
+        row = sample_df.iloc[idx]
+        st.session_state["input_age"] = int(row["age"])
+        st.session_state["input_sex"] = int(row["sex"])
+        st.session_state["input_cp"] = int(row["cp"])
+        st.session_state["input_trestbps"] = int(row["trestbps"])
+        st.session_state["input_chol"] = int(row["chol"])
+        st.session_state["input_fbs"] = int(row["fbs"])
+        st.session_state["input_restecg"] = int(row["restecg"])
+        st.session_state["input_thalach"] = int(row["thalach"])
+        st.session_state["input_exang"] = int(row["exang"])
+        st.session_state["input_oldpeak"] = float(row["oldpeak"])
+        st.session_state["input_slope"] = int(row["slope"])
+        st.session_state["input_ca"] = int(row["ca"])
+        st.session_state["input_thal"] = int(row["thal"])
+
+
 def main():
+    # Initialize session_state defaults if not present
+    for key, val in DEFAULT_INPUT_VALUES.items():
+        if key not in st.session_state:
+            st.session_state[key] = val
+
     # Render Sidebar
     st.sidebar.title("🫀 Project Navigation")
     st.sidebar.markdown("---")
@@ -163,64 +214,34 @@ def main():
     
     with col_demo1:
         if not sample_df.empty:
-            sample_idx = st.selectbox(
+            st.selectbox(
                 "💡 Select an Example Patient Record from Held-Out Test Set (for Demonstration):",
                 options=[None] + list(range(len(sample_df))),
-                format_func=lambda x: "Choose an example patient record..." if x is None else f"Patient Record #{x + 1} (Age: {sample_df.iloc[x]['age']}, Sex: {'Male' if sample_df.iloc[x]['sex']==1 else 'Female'}, Max HR: {sample_df.iloc[x]['thalach']})"
+                format_func=lambda x: "Choose an example patient record..." if x is None else f"Patient Record #{x + 1} (Age: {sample_df.iloc[x]['age']}, Sex: {'Male' if sample_df.iloc[x]['sex']==1 else 'Female'}, Max HR: {sample_df.iloc[x]['thalach']})",
+                key="sample_patient_selector",
+                on_change=load_example_patient_callback,
+                args=(sample_df,)
             )
-        else:
-            sample_idx = None
 
     with col_demo2:
         st.write("") # Spacer
         st.write("")
-        reset_pressed = st.button("🔄 Reset Inputs")
+        st.button("🔄 Reset Inputs", on_click=reset_all_inputs, use_container_width=True)
 
-    if reset_pressed:
-        st.session_state.clear()
-        st.rerun()
-
-    # Pre-populate form values if example record selected
-    if sample_idx is not None and not sample_df.empty:
-        row = sample_df.iloc[sample_idx]
-        default_age = int(row["age"])
-        default_sex = int(row["sex"])
-        default_cp = int(row["cp"])
-        default_trestbps = int(row["trestbps"])
-        default_chol = int(row["chol"])
-        default_fbs = int(row["fbs"])
-        default_restecg = int(row["restecg"])
-        default_thalach = int(row["thalach"])
-        default_exang = int(row["exang"])
-        default_oldpeak = float(row["oldpeak"])
-        default_slope = int(row["slope"])
-        default_ca = int(row["ca"])
-        default_thal = int(row["thal"])
-        st.info(f"Loaded Patient Record #{sample_idx + 1} from held-out test set — for demonstration only.")
-    else:
-        default_age = 55
-        default_sex = 1
-        default_cp = 1
-        default_trestbps = 130
-        default_chol = 240
-        default_fbs = 0
-        default_restecg = 0
-        default_thalach = 150
-        default_exang = 0
-        default_oldpeak = 1.0
-        default_slope = 1
-        default_ca = 0
-        default_thal = 3
+    # Show info banner if an example record is active
+    current_sample = st.session_state.get("sample_patient_selector")
+    if current_sample is not None and not sample_df.empty:
+        st.info(f"Loaded Patient Record #{current_sample + 1} from held-out test set — for demonstration only.")
 
     # Main Clinical Input Form
     with st.form("patient_prediction_form"):
         st.markdown("### Patient Clinical Features Form")
 
         # Model Architecture Selection Choice
-        selected_model_type = st.radio(
+        st.radio(
             "Select Prediction Engine:",
             options=["Machine Learning (Tuned Random Forest — Recommended)", "Deep Learning (Artificial Neural Network — ANN-3)"],
-            index=0,
+            key="input_model_type",
             horizontal=True,
             help="Choose between the primary frozen Random Forest ML model or the secondary Deep Learning ANN model."
         )
@@ -235,7 +256,7 @@ def main():
                 "Age (years)",
                 min_value=20,
                 max_value=100,
-                value=default_age,
+                key="input_age",
                 help="Patient age in years [Observed dataset range: 29–77]"
             )
         with c2:
@@ -244,7 +265,7 @@ def main():
                 "Sex",
                 options=list(sex_options.keys()),
                 format_func=lambda x: sex_options[x],
-                index=0 if default_sex == 1 else 1,
+                key="input_sex",
                 help="Patient biological sex"
             )
 
@@ -258,14 +279,14 @@ def main():
                 "Resting Blood Pressure (mm Hg)",
                 min_value=80,
                 max_value=220,
-                value=default_trestbps,
+                key="input_trestbps",
                 help="Resting blood pressure in mm Hg on admission to hospital [Observed dataset range: 94–200]"
             )
             chol = st.number_input(
                 "Serum Cholesterol (mg/dl)",
                 min_value=100,
                 max_value=600,
-                value=default_chol,
+                key="input_chol",
                 help="Serum cholesterol measurement in mg/dl [Observed dataset range: 126–564]"
             )
         with c4:
@@ -273,15 +294,15 @@ def main():
                 "Maximum Heart Rate Achieved (bpm)",
                 min_value=60,
                 max_value=220,
-                value=default_thalach,
+                key="input_thalach",
                 help="Maximum heart rate achieved during exercise stress test [Observed dataset range: 71–202]"
             )
             oldpeak = st.number_input(
                 "ST Depression (Oldpeak)",
                 min_value=0.0,
                 max_value=10.0,
-                value=default_oldpeak,
                 step=0.1,
+                key="input_oldpeak",
                 help="ST depression induced by exercise relative to rest [Observed dataset range: 0.0–6.2]"
             )
 
@@ -302,7 +323,7 @@ def main():
                 "Chest Pain Type (cp)",
                 options=list(cp_options.keys()),
                 format_func=lambda x: cp_options[x],
-                index=max(0, min(default_cp - 1, 3)),
+                key="input_cp",
                 help="Chest pain type category reported by patient"
             )
 
@@ -311,7 +332,7 @@ def main():
                 "Fasting Blood Sugar > 120 mg/dl (fbs)",
                 options=list(fbs_options.keys()),
                 format_func=lambda x: fbs_options[x],
-                index=0 if default_fbs == 0 else 1,
+                key="input_fbs",
                 help="Fasting blood sugar > 120 mg/dl indicator"
             )
 
@@ -324,7 +345,7 @@ def main():
                 "Resting ECG Results (restecg)",
                 options=list(restecg_options.keys()),
                 format_func=lambda x: restecg_options[x],
-                index=max(0, min(default_restecg, 2)),
+                key="input_restecg",
                 help="Resting electrocardiographic results"
             )
 
@@ -333,7 +354,7 @@ def main():
                 "Exercise-Induced Angina (exang)",
                 options=list(exang_options.keys()),
                 format_func=lambda x: exang_options[x],
-                index=0 if default_exang == 0 else 1,
+                key="input_exang",
                 help="Exercise induced angina present"
             )
 
@@ -347,7 +368,7 @@ def main():
                 "ST Segment Slope (slope)",
                 options=list(slope_options.keys()),
                 format_func=lambda x: slope_options[x],
-                index=max(0, min(default_slope - 1, 2)),
+                key="input_slope",
                 help="Slope of the peak exercise ST segment"
             )
 
@@ -356,7 +377,7 @@ def main():
                 "Number of Major Vessels Colored by Fluoroscopy (ca)",
                 options=list(ca_options.keys()),
                 format_func=lambda x: ca_options[x],
-                index=max(0, min(default_ca, 3)),
+                key="input_ca",
                 help="Number of major vessels (0-3) colored by fluoroscopy"
             )
 
@@ -365,13 +386,11 @@ def main():
                 6: "6 - Fixed Defect",
                 7: "7 - Reversible Defect"
             }
-            thal_keys = list(thal_options.keys())
-            thal_idx = thal_keys.index(default_thal) if default_thal in thal_keys else 0
             thal = st.selectbox(
                 "Thalassemia (thal)",
-                options=thal_keys,
+                options=list(thal_options.keys()),
                 format_func=lambda x: thal_options[x],
-                index=thal_idx,
+                key="input_thal",
                 help="Thalassemia nuclear blood disorder status"
             )
 
@@ -379,6 +398,7 @@ def main():
 
     # Execution of Model Prediction Routine
     if submit_btn:
+        selected_model_type = st.session_state["input_model_type"]
         input_data = {
             "age": age,
             "sex": sex,
